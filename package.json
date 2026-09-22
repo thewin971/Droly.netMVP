@@ -1,0 +1,9 @@
+{
+  "name": "droly",
+  "private": true,
+  "type": "module",
+  "description": "Site Droly (statique) + fonction API Vercel (api/generate.js) qui appelle Runway.",
+  "dependencies": {
+    "@runwayml/sdk": "latest"
+  }
+}

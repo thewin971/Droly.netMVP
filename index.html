@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0B0A08" />
+<title>Droly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0A08;
+  --bg-elev:#15130E;
+  --bg-elev-2:#1D1A13;
+  --ink:#F3EEE2;
+  --ink-dim:#B7AE9A;
+  --ink-mute:#8C836F;
+  --accent:#FF5A5F;
+  --accent-2:#E14850;
+  --accent-ink:#FFFFFF;
+  --accent-b:#00A699;
+  --line:rgba(243,238,226,0.10);
+  --line-strong:rgba(243,238,226,0.20);
+  --radius-s:8px;
+  --radius-m:14px;
+  --serif:'Fraunces', serif;
+  --sans:'Work Sans', sans-serif;
+  --error:#e2867a;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+}
+button,a{touch-action:manipulation;}
+.ambient{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.ambient span{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;}
+.ambient .b1{width:520px;height:520px;background:var(--accent);top:-12%;left:6%;opacity:0.32;animation:driftA 26s ease-in-out infinite;}
+.ambient .b2{width:600px;height:600px;background:var(--accent-b);top:auto;bottom:-16%;right:4%;opacity:0.28;animation:driftB 32s ease-in-out infinite;}
+.ambient .b3{width:420px;height:420px;background:var(--accent);top:38%;right:28%;opacity:0.16;animation:driftC 22s ease-in-out infinite;}
+@keyframes driftA{0%,100%{transform:translate(0,0) scale(1);opacity:0.28;}50%{transform:translate(60px,50px) scale(1.15);opacity:0.42;}}
+@keyframes driftB{0%,100%{transform:translate(0,0) scale(1);opacity:0.24;}50%{transform:translate(-55px,-35px) scale(1.1);opacity:0.38;}}
+@keyframes driftC{0%,100%{transform:translate(0,0) scale(0.9);opacity:0.13;}50%{transform:translate(35px,-45px) scale(1.05);opacity:0.26;}}
+main{position:relative;z-index:1;}
+.footer{position:relative;z-index:1;}
+img,svg{display:block;max-width:100%;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+section{padding:88px 0;}
+section[id]{scroll-margin-top:90px;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+.border-top{border-top:1px solid var(--line);}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:40;background:rgba(11,10,8,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:1.25rem;letter-spacing:-0.01em;}
+.footer .brand{font-size:1.0625rem;}
+.brand-mark{width:22px;height:22px;flex:none;}
+.nav-links{display:flex;gap:32px;font-size:0.9375rem;color:var(--ink-dim);}
+.nav-links a:hover{color:var(--ink);}
+.nav-cta{display:inline-block;padding:10px 20px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:0.9375rem;transition:background .15s ease;}
+.nav-cta:hover{background:var(--accent-2);}
+@media (max-width:760px){ .nav-links{display:none;} }
+
+/* HERO */
+.hero{padding:72px 0 96px;}
+.hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+@media (max-width:900px){ .hero .wrap{grid-template-columns:1fr;gap:44px;} }
+.hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.15rem,4.4vw,3.4rem);line-height:1.08;letter-spacing:-0.015em;margin:0 0 22px;}
+.hero p.lead{font-size:1.0625rem;line-height:1.65;color:var(--ink-dim);max-width:46ch;margin:0 0 32px;}
+.hero-ctas{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.btn-primary{display:inline-block;padding:14px 26px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:0.9375rem;border:none;cursor:pointer;transition:background .15s ease;}
+.btn-primary:hover{background:var(--accent-2);}
+.link-secondary{font-size:0.9375rem;color:var(--ink-dim);border-bottom:1px solid var(--line-strong);padding-bottom:2px;}
+.link-secondary:hover{color:var(--ink);border-color:var(--ink-dim);}
+
+/* TRY FORM (paste-a-link) */
+.try-form{display:flex;gap:10px;margin:0 0 12px;}
+.try-input{flex:1;min-width:0;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:999px;padding:14px 20px;color:var(--ink);font-family:var(--sans);font-size:0.9375rem;outline:none;transition:border-color .15s ease,box-shadow .15s ease;}
+.try-input::placeholder{color:var(--ink-mute);}
+.try-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,90,95,0.18);}
+.try-input.error{border-color:var(--error);}
+.try-form .btn-primary{flex:none;}
+.try-hint{font-size:0.8125rem;color:var(--ink-mute);margin:0 0 32px;}
+.try-hint.error{color:var(--error);}
+
+/* TRY / CHECKOUT FLOW OVERLAY */
+.flow-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(11,10,8,0.72);backdrop-filter:blur(8px);}
+.flow-overlay.open{display:flex;}
+.flow-panel{position:relative;width:100%;max-width:440px;max-height:88vh;overflow-y:auto;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:20px;padding:34px 30px;box-shadow:0 40px 80px -20px rgba(0,0,0,0.7);}
+.flow-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink-dim);font-size:1.1rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.flow-close:hover{color:var(--ink);border-color:var(--line-strong);}
+.flow-step{display:none;}
+.flow-step.active{display:block;}
+.flow-eyebrow{font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+.flow-step h3{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin:0 0 14px;line-height:1.25;}
+.flow-step p{font-size:0.9375rem;color:var(--ink-dim);line-height:1.55;margin:0 0 18px;}
+.flow-spinner{width:36px;height:36px;border-radius:50%;border:3px solid var(--line-strong);border-top-color:var(--accent);animation:spin .9s linear infinite;margin:2px 0 22px;}
+.flow-tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+.flow-tasks li{font-size:0.875rem;color:var(--ink-mute);position:relative;padding-left:28px;transition:color .2s ease;}
+.flow-tasks li::before{content:'';position:absolute;left:0;top:2px;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line-strong);transition:background .2s ease,border-color .2s ease;}
+.flow-tasks li.doing{color:var(--ink);}
+.flow-tasks li.done{color:var(--ink);}
+.flow-tasks li.done::before{border-color:var(--accent);background:var(--accent);}
+.flow-badge{display:inline-block;font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:rgba(255,90,95,0.12);border:1px solid rgba(255,90,95,0.3);padding:4px 11px;border-radius:999px;margin:0 0 16px;}
+.flow-preview-frame{position:relative;border-radius:var(--radius-m);overflow:hidden;aspect-ratio:16/10;margin:0 0 18px;background:#000;}
+.flow-preview-frame video{width:100%;height:100%;object-fit:cover;}
+.flow-watermark{position:absolute;bottom:10px;right:12px;font-size:0.6875rem;letter-spacing:.08em;color:rgba(255,255,255,0.8);text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none;}
+.flow-url-echo{font-size:0.8125rem;color:var(--ink-mute);word-break:break-all;margin:-8px 0 18px;}
+.flow-block{display:block;width:100%;text-align:center;margin:0 0 12px;}
+.flow-plan{background:var(--bg-elev-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:16px 18px;margin:0 0 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.flow-plan .name{font-weight:600;font-size:0.9375rem;}
+.flow-plan .sub{font-size:0.8125rem;color:var(--ink-mute);margin-top:2px;}
+.flow-plan .price{color:var(--accent);font-weight:700;font-size:1.0625rem;white-space:nowrap;}
+.flow-fields{display:flex;flex-direction:column;gap:14px;margin:0 0 8px;}
+.flow-fields label{font-size:0.75rem;color:var(--ink-mute);display:block;margin:0 0 6px;}
+.flow-fields input{width:100%;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:var(--sans);font-size:0.9375rem;outline:none;transition:border-color .15s ease;}
+.flow-fields input:focus{border-color:var(--accent);}
+.flow-row{display:flex;gap:12px;}
+.flow-row > div{flex:1;min-width:0;}
+.flow-secure{font-size:0.75rem;color:var(--ink-mute);text-align:center;margin:16px 0 0;}
+.flow-success-icon{width:52px;height:52px;border-radius:50%;background:rgba(255,90,95,0.15);border:1px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 0 20px;font-size:1.5rem;}
+.flow-submit[disabled]{opacity:0.7;cursor:default;}
+
+/* QUIZ TEASER (après la vidéo hero) */
+.quiz-teaser-card{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:var(--radius-m);padding:30px 34px;}
+.quiz-teaser-copy h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.375rem,2.6vw,1.75rem);margin:0 0 10px;line-height:1.25;}
+.quiz-teaser-copy p{color:var(--ink-dim);font-size:0.9375rem;margin:0;max-width:56ch;line-height:1.55;}
+.quiz-teaser .btn-primary{flex:none;}
+
+/* QUIZ OVERLAY (réutilise le style de .flow-overlay / .flow-panel) */
+.quiz-progress{height:3px;background:var(--line);border-radius:999px;overflow:hidden;margin:0 0 22px;}
+.quiz-progress-fill{height:100%;width:0%;background:var(--accent);transition:width .3s ease;}
+.quiz-back{background:none;border:none;color:var(--ink-mute);font-size:0.8125rem;cursor:pointer;padding:0;margin:0 0 18px;display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);}
+.quiz-back:hover{color:var(--ink);}
+.quiz-eyebrow{font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+.quiz-title{font-family:var(--serif);font-weight:600;font-size:1.375rem;line-height:1.3;margin:0 0 18px;}
+.quiz-body{font-size:0.9375rem;color:var(--ink-dim);line-height:1.6;margin:0 0 22px;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin:0 0 6px;}
+.quiz-option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line-strong);border-radius:12px;padding:15px 18px;color:var(--ink);font-family:var(--sans);font-size:0.9375rem;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+.quiz-option:hover{border-color:var(--accent);}
+.quiz-option.selected{border-color:var(--accent);background:rgba(255,90,95,0.08);}
+.quiz-option .box{flex:none;width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line-strong);}
+.quiz-option.selected .box{border-color:var(--accent);background:var(--accent);}
+.quiz-other-input{width:100%;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;padding:12px 14px;color:var(--ink);font-family:var(--sans);font-size:0.9375rem;margin:2px 0 16px;outline:none;}
+.quiz-other-input:focus{border-color:var(--accent);}
+.quiz-slider-value{font-family:var(--serif);font-weight:600;font-size:2.25rem;margin:6px 0 14px;}
+.quiz-slider-tag{display:inline-block;font-size:0.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:rgba(255,90,95,0.12);border:1px solid rgba(255,90,95,0.3);padding:3px 10px;border-radius:999px;margin-left:10px;vertical-align:middle;}
+.quiz-slider{width:100%;margin:10px 0 6px;accent-color:var(--accent);}
+.quiz-slider-scale{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--ink-mute);margin:0 0 20px;}
+.quiz-note{font-size:0.875rem;color:var(--ink-dim);line-height:1.55;margin:0 0 22px;}
+.quiz-note b{color:var(--ink);}
+.quiz-recap{background:var(--bg-elev-2);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;margin:0 0 22px;}
+.quiz-recap-row{display:flex;justify-content:space-between;gap:16px;padding:14px 18px;font-size:0.875rem;border-bottom:1px solid var(--line);}
+.quiz-recap-row:last-child{border-bottom:none;}
+.quiz-recap-row .k{color:var(--ink-mute);letter-spacing:.03em;text-transform:uppercase;font-size:0.6875rem;flex:none;padding-top:2px;}
+.quiz-recap-row .v{color:var(--ink);font-weight:600;text-align:right;}
+
+/* HERO FRAME (CSS-only animated "render" preview) */
+.hero-frame{position:relative;aspect-ratio:16/9;border-radius:var(--radius-m);overflow:hidden;border:1px solid var(--line-strong);background:var(--bg-elev);box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);}
+.hero-frame .scene{position:absolute;inset:-12%;animation:pan 16s ease-in-out infinite alternate;}
+.scene-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.hero-frame.is-paused .scene{animation-play-state:paused;}
+@keyframes pan{0%{transform:scale(1.06) translate(0,0);}100%{transform:scale(1.18) translate(-3%,-2%);}}
+@media (prefers-reduced-motion: reduce){ .hero-frame .scene, .hero-frame .scene-sky-alt, .shot-card .grad, .ambient span, .shot-card::before{animation:none !important;} .reveal{opacity:1 !important;transform:none !important;transition:none !important;} }
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.16,.8,.24,1),transform .7s cubic-bezier(.16,.8,.24,1);will-change:opacity,transform;}
+.reveal.in-view{opacity:1;transform:none;}
+.reveal-scale{opacity:0;transform:scale(.94);transition:opacity .7s cubic-bezier(.16,.8,.24,1),transform .7s cubic-bezier(.16,.8,.24,1);}
+.reveal-scale.in-view{opacity:1;transform:none;}
+.reveal-stagger > *{opacity:0;transform:translateY(24px);transition:opacity .6s cubic-bezier(.16,.8,.24,1),transform .6s cubic-bezier(.16,.8,.24,1);}
+.reveal-stagger.in-view > *{opacity:1;transform:none;}
+.reveal-stagger > *:nth-child(1){transition-delay:0s;}
+.reveal-stagger > *:nth-child(2){transition-delay:.08s;}
+.reveal-stagger > *:nth-child(3){transition-delay:.16s;}
+.reveal-stagger > *:nth-child(4){transition-delay:.24s;}
+.reveal-stagger > *:nth-child(5){transition-delay:.32s;}
+.reveal-stagger > *:nth-child(6){transition-delay:.4s;}
+@media (prefers-reduced-motion: reduce){ .reveal-scale, .reveal-stagger > *{opacity:1 !important;transform:none !important;transition:none !important;} }
+.scene-sky{position:absolute;inset:0;background:radial-gradient(60% 50% at 62% 30%, rgba(232,72,122,0.5), transparent 60%), linear-gradient(190deg, #241240 0%, #180E2E 42%, #100A1E 78%, #0B0A08 100%);}
+.scene-sky-alt{position:absolute;inset:0;background:radial-gradient(55% 45% at 35% 38%, rgba(75,58,209,0.55), transparent 60%), linear-gradient(190deg, #1C1044 0%, #140C30 42%, #0E0820 78%, #0B0A08 100%);animation:fade 11s ease-in-out infinite alternate;}
+.hero-frame.is-paused .scene-sky-alt{animation-play-state:paused;}
+@keyframes fade{0%{opacity:0;}100%{opacity:0.85;}}
+.scene-sun{position:absolute;top:26%;left:60%;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle, rgba(245,150,180,0.95), rgba(232,72,122,0.35) 55%, transparent 72%);filter:blur(2px);}
+.scene-ground{position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg, #0B0A08 0%, #050403 100%);clip-path:polygon(0 38%, 18% 30%, 34% 42%, 52% 26%, 68% 40%, 84% 22%, 100% 34%, 100% 100%, 0 100%);}
+.hero-frame .chip{position:absolute;top:14px;left:14px;padding:6px 12px;border-radius:999px;background:rgba(11,10,8,0.55);border:1px solid rgba(255,255,255,0.25);font-size:0.75rem;color:rgba(255,255,255,0.9);backdrop-filter:blur(6px);}
+.hero-frame .bar{position:absolute;left:14px;right:14px;bottom:14px;display:flex;align-items:center;gap:12px;}
+.play-toggle{width:34px;height:34px;flex:none;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:rgba(11,10,8,0.55);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.track{flex:1;height:3px;background:rgba(255,255,255,0.3);border-radius:2px;overflow:hidden;}
+.track-fill{height:100%;width:0%;background:var(--accent);border-radius:2px;}
+.timecode{font-size:0.75rem;color:rgba(255,255,255,0.9);font-variant-numeric:tabular-nums;flex:none;}
+.hero-caption{margin-top:14px;font-family:var(--serif);font-style:italic;font-size:0.9375rem;color:var(--ink-mute);}
+
+/* SECTION HEAD */
+.section-head{max-width:640px;margin-bottom:52px;}
+.section-head h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.5rem,2.6vw,2.05rem);letter-spacing:-0.01em;margin:0 0 14px;line-height:1.15;}
+.section-head p{color:var(--ink-dim);font-size:1rem;line-height:1.6;margin:0;max-width:52ch;}
+
+/* STEPS */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;}
+@media (max-width:900px){ .steps-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:560px){ .steps-grid{grid-template-columns:1fr;} }
+.step-card{background:var(--bg);padding:30px 26px;}
+.step-num{display:block;font-family:var(--serif);font-style:italic;font-weight:500;font-size:1.5rem;color:var(--accent);margin-bottom:18px;}
+.step-card h3{font-size:1.0625rem;font-weight:600;margin:0 0 10px;}
+.step-card p{font-size:0.9375rem;color:var(--ink-dim);line-height:1.55;margin:0;}
+
+/* SHOTS */
+.shots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+@media (max-width:900px){ .shots-grid{grid-template-columns:repeat(2,1fr);} }
+.shot-card{position:relative;aspect-ratio:3/4;border-radius:var(--radius-s);overflow:hidden;border:1px solid var(--line);}
+.shot-card .grad{position:absolute;inset:-16%;animation:pan 12s ease-in-out infinite alternate;}
+.shot-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.grad-1{background:linear-gradient(200deg,#1E2A5C 0%,#12193A 60%,#0B0A08 100%);}
+.grad-2{background:linear-gradient(200deg,#3A2030 0%,#1E1420 70%,#0B0A08 100%);}
+.grad-3{background:linear-gradient(200deg,#4A2A3A 0%,#2A1826 65%,#0B0A08 100%);}
+.grad-4{background:linear-gradient(200deg,#123A3E 0%,#0E2426 65%,#0B0A08 100%);}
+.grad-5{background:linear-gradient(200deg,#3A1E4A 0%,#22122E 65%,#0B0A08 100%);}
+.grad-6{background:linear-gradient(200deg,#4A1E38 0%,#2A1522 65%,#0B0A08 100%);}
+.shot-card .meta{position:absolute;z-index:3;left:10px;right:10px;bottom:10px;text-shadow:0 1px 3px rgba(0,0,0,.6);display:flex;justify-content:space-between;align-items:flex-end;}
+.shot-card .meta span{font-size:0.75rem;}
+.shot-card .name{color:#FFFFFF;font-weight:600;}
+.shot-card .dur{color:rgba(255,255,255,0.78);font-variant-numeric:tabular-nums;}
+
+.hero-frame::before, .shot-card::before{content:'';position:absolute;pointer-events:none;z-index:2;}
+.hero-frame::before{inset:0;opacity:0.06;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.hero-frame::after, .shot-card::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.42) 100%);}
+.shot-card::before{inset:-20% -60%;background:linear-gradient(75deg, transparent 42%, rgba(255,255,255,0.14) 50%, transparent 58%);animation:sweep 7s ease-in-out infinite alternate;}
+@keyframes sweep{0%{transform:translateX(-30%);}100%{transform:translateX(30%);}}
+.shots-grid .shot-card:nth-child(1)::before{animation-duration:6s;}
+.shots-grid .shot-card:nth-child(2)::before{animation-duration:7.6s;}
+.shots-grid .shot-card:nth-child(3)::before{animation-duration:6.8s;}
+.shots-grid .shot-card:nth-child(4)::before{animation-duration:8.2s;}
+.shots-grid .shot-card:nth-child(5)::before{animation-duration:7.1s;}
+.shots-grid .shot-card:nth-child(6)::before{animation-duration:6.4s;}
+
+/* PROOF */
+.quote-grid{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px;}
+.quote-grid::-webkit-scrollbar{display:none;}
+.quote-card{background:var(--bg-elev);border:1px solid var(--line);border-radius:var(--radius-m);padding:26px;flex:0 0 auto;width:78%;max-width:280px;scroll-snap-align:start;}
+@media (min-width:640px){ .quote-card{width:260px;} }
+.quote-card p{font-family:var(--serif);font-weight:500;font-size:1.0625rem;line-height:1.45;margin:0 0 18px;}
+.quote-card .who{font-size:0.8125rem;color:var(--ink-mute);}
+
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* FINAL CTA */
+.finalcta{background:var(--bg-elev);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.finalcta .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:28px;}
+.finalcta h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.5rem,3vw,2rem);margin:0;max-width:460px;line-height:1.2;}
+
+/* FOOTER */
+.footer{padding:48px 0;}
+.footer .wrap{display:flex;flex-direction:column;align-items:flex-start;gap:18px;}
+.footer-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;width:100%;gap:20px;}
+.footer-links{display:flex;gap:24px;font-size:0.875rem;color:var(--ink-dim);flex-wrap:wrap;}
+.footer-links a:hover{color:var(--ink);}
+.footer-note{font-size:0.75rem;color:var(--ink-mute);margin:0;}
+
+@media (max-width:640px){
+  .wrap{padding:0 20px;}
+  section{padding:56px 0;}
+  section[id]{scroll-margin-top:64px;}
+  .hero{padding:36px 0 56px;}
+  .hero .wrap{gap:32px;}
+  .nav .wrap{height:60px;}
+  .brand{font-size:1.125rem;}
+  .hero-ctas{flex-direction:column;align-items:stretch;gap:14px;}
+  .hero-ctas .btn-primary{width:100%;text-align:center;padding:15px 26px;}
+  .hero-ctas .link-secondary{text-align:center;}
+  .try-form{flex-direction:column;}
+  .try-form .btn-primary{width:100%;text-align:center;padding:15px 26px;}
+  .play-toggle{width:40px;height:40px;}
+  .section-head{margin-bottom:32px;}
+  .steps-grid,.shots-grid{gap:12px;}
+  .quote-grid{gap:12px;margin:0 -20px;padding:0 20px 4px;}
+  .finalcta .wrap{flex-direction:column;align-items:flex-start;}
+  .finalcta .btn-primary{width:100%;text-align:center;padding:15px 26px;}
+  .footer-top{flex-direction:column;align-items:flex-start;gap:16px;}
+  .flow-panel{padding:28px 20px;max-height:92vh;}
+  .flow-row{flex-direction:column;gap:14px;}
+  .quiz-teaser-card{flex-direction:column;align-items:stretch;text-align:left;padding:26px 22px;}
+  .quiz-teaser .btn-primary{width:100%;text-align:center;}
+}
+.shot-card::after{background:linear-gradient(to top, rgba(0,0,0,.6) 0%, transparent 32%), radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.42) 100%);}
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="1.5"/><circle cx="12" cy="12" r="3.4" fill="var(--accent)"/></svg>
+      Droly
+    </a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="#comment">Comment ça marche</a>
+    </nav>
+    <a class="nav-cta" href="#top" id="navCta">Essayer</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-copy reveal">
+        <h1>Vos photos d’annonce deviennent une vidéo de visite.</h1>
+        <p class="lead">Un vrai mouvement de caméra, généré depuis les photos que vous avez déjà. Aucun tournage, aucun montage — le rendu est à vous, prêt à revendre.</p>
+        <form class="try-form" id="tryForm" novalidate>
+          <input type="url" inputmode="url" class="try-input" id="listingUrl" placeholder="Collez le lien de l’annonce (Airbnb et Leboncoin)" autocomplete="off">
+          <button type="submit" class="btn-primary">Essayer</button>
+        </form>
+        <p class="try-hint" id="tryHint">Aperçu gratuit, sans carte bancaire.</p>
+      </div>
+      <div class="hero-visual reveal reveal-scale">
+        <div class="hero-frame">
+          <video class="scene-video" id="heroVideo" autoplay muted loop playsinline preload="auto">
+            <source src="videos/hero.mp4" type="video/mp4">
+          </video>
+          <span class="chip">Aperçu du rendu</span>
+          <div class="bar">
+            <button class="play-toggle" id="playToggle" aria-label="Mettre en pause l’aperçu">
+              <svg class="icon-pause" viewBox="0 0 12 12" width="12" height="12" fill="#FFFFFF"><rect x="1.5" y="1" width="3" height="10"></rect><rect x="7.5" y="1" width="3" height="10"></rect></svg>
+              <svg class="icon-play" viewBox="0 0 12 12" width="12" height="12" fill="#FFFFFF" style="display:none"><path d="M2 1L11 6L2 11Z"></path></svg>
+            </button>
+            <div class="track"><div class="track-fill" id="trackFill"></div></div>
+            <span class="timecode" id="timecode">0:00 / 0:00</span>
+          </div>
+        </div>
+        <p class="hero-caption">Aperçu d’un rendu Droly — le fichier final, livré sans filigrane après achat.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="quiz-teaser">
+    <div class="wrap">
+      <div class="quiz-teaser-card reveal">
+        <div class="quiz-teaser-copy">
+          <p class="flow-eyebrow" style="margin-bottom:8px;">2 MINUTES CHRONO</p>
+          <h2>Découvre combien tes vidéos peuvent te rapporter</h2>
+          <p>Trois questions rapides sur ta situation, et un plan personnalisé avant de créer ta première vidéo.</p>
+        </div>
+        <button class="btn-primary" id="quizStartBtn" type="button">Commencer</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps border-top" id="comment">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>De l’annonce à la vente, en quatre étapes</h2>
+        <p>Le plus long, c’est encore de choisir l’annonce.</p>
+      </div>
+      <div class="steps-grid reveal-stagger">
+        <div class="step-card"><span class="step-num">01</span><h3>Collez le lien</h3><p>On récupère les photos de l’annonce automatiquement, sans rien télécharger à la main.</p></div>
+        <div class="step-card"><span class="step-num">02</span><h3>La caméra se met en mouvement</h3><p>Chaque pièce reçoit son propre mouvement : travelling, panoramique ou zoom lent.</p></div>
+        <div class="step-card"><span class="step-num">03</span><h3>Montrez la version filigranée</h3><p>Le propriétaire découvre sa maison mise en scène, avant même d’avoir payé.</p></div>
+        <div class="step-card"><span class="step-num">04</span><h3>Encaissez, livrez le fichier propre</h3><p>Vous fixez votre prix. Aucune commission n’est prélevée sur la vente.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shots border-top">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Chaque pièce a son propre plan</h2>
+        <p>Salon, cuisine, piscine, vue drone : le mouvement s’adapte à ce que montre la photo.</p>
+      </div>
+      <div class="shots-grid reveal-stagger">
+        <div class="shot-card"><video class="shot-video" id="salonVideo" autoplay muted loop playsinline preload="auto"><source src="videos/salon.mp4" type="video/mp4"></video><div class="meta"><span class="name">Salon</span><span class="dur">0:10</span></div></div>
+        <div class="shot-card"><video class="shot-video" autoplay muted loop playsinline preload="auto"><source src="videos/cuisine.mp4" type="video/mp4"></video><div class="meta"><span class="name">Cuisine</span><span class="dur">0:10</span></div></div>
+        <div class="shot-card"><video class="shot-video" autoplay muted loop playsinline preload="auto"><source src="videos/piscine.mp4" type="video/mp4"></video><div class="meta"><span class="name">Piscine</span><span class="dur">0:10</span></div></div>
+        <div class="shot-card"><video class="shot-video" autoplay muted loop playsinline preload="auto"><source src="videos/drone.mp4" type="video/mp4"></video><div class="meta"><span class="name">Vue drone</span><span class="dur">0:10</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof border-top">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Ils ont commencé avec une seule annonce</h2>
+        <p>Des créateurs et agents qui revendent leurs premières vidéos en quelques jours.</p>
+      </div>
+      <div class="quote-grid reveal-stagger">
+        <div class="quote-card"><p>« Le propriétaire a cru que j’avais vraiment tourné sur place. »</p><div class="who">Léna R.</div></div>
+        <div class="quote-card"><p>« Montrer le rendu suffit, je n’ai presque rien à expliquer. »</p><div class="who">Karim B.</div></div>
+        <div class="quote-card"><p>« Abonnement remboursé dès la première vente de la semaine. »</p><div class="who">Chloé M.</div></div>
+        <div class="quote-card"><p>« J’avais zéro portfolio. Ça n’a pas empêché la première vente. »</p><div class="who">Baptiste V.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="finalcta reveal" id="cta">
+    <div class="wrap">
+      <h2>Une annonce qui vous plaît. Une vidéo qui rapporte.</h2>
+      <a class="btn-primary" href="#top" id="finalCtaBtn">Essayer</a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="1.5"/><circle cx="12" cy="12" r="3.4" fill="var(--accent)"/></svg>
+        Droly
+      </div>
+      <div class="footer-links">
+        <a href="#comment">Comment ça marche</a>
+        <a href="#top">Haut de page</a>
+      </div>
+    </div>
+    <p class="footer-note">Concept MVP inspiré de dronly.co — projet d’exploration, non affilié.</p>
+  </div>
+</footer>
+
+<div class="flow-overlay" id="flowOverlay" aria-hidden="true">
+  <div class="flow-panel">
+    <button class="flow-close" id="flowClose" type="button" aria-label="Fermer">✕</button>
+
+    <div class="flow-step" data-step="processing">
+      <p class="flow-eyebrow">Étape 1 / 3</p>
+      <div class="flow-spinner" aria-hidden="true"></div>
+      <h3>Génération de votre aperçu…</h3>
+      <ul class="flow-tasks" id="flowTasks">
+        <li data-task="fetch">Récupération des photos de l’annonce</li>
+        <li data-task="analyze">Repérage des pièces</li>
+        <li data-task="camera">Génération des mouvements de caméra</li>
+        <li data-task="render">Rendu de la vidéo</li>
+      </ul>
+      <p class="flow-live-status" id="flowLiveStatus" style="display:none;font-size:0.8125rem;color:var(--ink-mute);margin:18px 0 0;"></p>
+      <div id="flowErrorBox" style="display:none;margin-top:18px;">
+        <p style="color:var(--error);font-size:0.875rem;margin:0 0 14px;" id="flowErrorMsg"></p>
+        <button class="btn-primary flow-block" id="flowErrorRetry" type="button">Réessayer</button>
+      </div>
+    </div>
+
+    <div class="flow-step" data-step="preview">
+      <p class="flow-eyebrow">Étape 2 / 3</p>
+      <span class="flow-badge">Aperçu généré</span>
+      <div class="flow-preview-frame" id="flowPreviewFrame">
+        <span class="flow-watermark">APERÇU DROLY</span>
+      </div>
+      <h3>Votre vidéo est prête</h3>
+      <p class="flow-url-echo">Générée depuis : <span id="flowUrlEcho"></span></p>
+      <button class="btn-primary flow-block" id="flowUnlockBtn" type="button">Débloquer le fichier sans filigrane</button>
+      <button class="link-secondary flow-block" id="flowRetryBtn" type="button" style="background:none;border:none;cursor:pointer;">Essayer un autre lien</button>
+    </div>
+
+    <div class="flow-step" data-step="checkout">
+      <p class="flow-eyebrow">Étape 3 / 3</p>
+      <h3>Débloquer ce fichier</h3>
+      <div class="flow-plan">
+        <div>
+          <div class="name">Abonnement Droly Créateur</div>
+          <div class="sub">Vidéos illimitées, sans filigrane</div>
+        </div>
+        <div class="price">29€<span style="font-size:0.75rem;color:var(--ink-mute);font-weight:500;">/mois</span></div>
+      </div>
+      <form id="checkoutForm">
+        <div class="flow-fields">
+          <div>
+            <label for="ccName">Nom sur la carte</label>
+            <input type="text" id="ccName" placeholder="Prénom Nom" autocomplete="cc-name" required>
+          </div>
+          <div>
+            <label for="cardNumber">Numéro de carte</label>
+            <input type="text" id="cardNumber" inputmode="numeric" placeholder="1234 1234 1234 1234" maxlength="19" autocomplete="cc-number" required>
+          </div>
+          <div class="flow-row">
+            <div>
+              <label for="cardExpiry">Expiration</label>
+              <input type="text" id="cardExpiry" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" required>
+            </div>
+            <div>
+              <label for="cardCvc">CVC</label>
+              <input type="text" id="cardCvc" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="cc-csc" required>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary flow-block flow-submit" type="submit" style="margin-top:6px;">S’abonner — 29€/mois</button>
+      </form>
+      <p class="flow-secure">Démo — aucune donnée bancaire n’est transmise ni conservée.</p>
+    </div>
+
+    <div class="flow-step" data-step="success">
+      <div class="flow-success-icon" aria-hidden="true">✓</div>
+      <h3>Paiement confirmé</h3>
+      <p>Votre vidéo sans filigrane est prête à être livrée à votre client.</p>
+      <button class="btn-primary flow-block" id="flowDownloadBtn" type="button">Télécharger la vidéo (.mp4)</button>
+      <button class="link-secondary flow-block" id="flowDoneBtn" type="button" style="background:none;border:none;cursor:pointer;">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="flow-overlay" id="quizOverlay" aria-hidden="true">
+  <div class="flow-panel quiz-panel">
+    <button class="flow-close" id="quizClose" type="button" aria-label="Fermer">✕</button>
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="quizProgressFill"></div></div>
+    <button class="quiz-back" id="quizBack" type="button" style="display:none;">← Question précédente</button>
+    <div id="quizContent"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var video = document.getElementById('heroVideo');
+  var btn = document.getElementById('playToggle');
+  var fill = document.getElementById('trackFill');
+  var tc = document.getElementById('timecode');
+  function fmt(s){ s = Math.max(0, Math.floor(s||0)); var m=Math.floor(s/60), r=s%60; return m+':'+(r<10?'0':'')+r; }
+  if(video && btn){
+    var iconPause = btn.querySelector('.icon-pause');
+    var iconPlay = btn.querySelector('.icon-play');
+    btn.addEventListener('click', function(){
+      if(video.paused){ video.play(); } else { video.pause(); }
+    });
+    video.addEventListener('play', function(){
+      iconPause.style.display = 'block';
+      iconPlay.style.display = 'none';
+      btn.setAttribute('aria-label', 'Mettre en pause l\'aperçu');
+    });
+    video.addEventListener('pause', function(){
+      iconPause.style.display = 'none';
+      iconPlay.style.display = 'block';
+      btn.setAttribute('aria-label', 'Reprendre l\'aperçu');
+    });
+    video.addEventListener('timeupdate', function(){
+      if(fill && video.duration){ fill.style.width = ((video.currentTime/video.duration)*100) + '%'; }
+      if(tc){ tc.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration); }
+    });
+    video.addEventListener('loadedmetadata', function(){
+      if(tc){ tc.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration); }
+    });
+  }
+  // TRY-A-LINK + CHECKOUT FLOW
+  (function(){
+    var tryForm = document.getElementById('tryForm');
+    var listingUrl = document.getElementById('listingUrl');
+    var tryHint = document.getElementById('tryHint');
+    var overlay = document.getElementById('flowOverlay');
+    if(!overlay) return;
+    var stepEls = overlay.querySelectorAll('.flow-step');
+    var flowUrlEcho = document.getElementById('flowUrlEcho');
+    var previewFrame = document.getElementById('flowPreviewFrame');
+    var previewCloneSrc = document.getElementById('heroVideo');
+    var previewVideoEl = null;
+    var liveStatus = document.getElementById('flowLiveStatus');
+    var errorBox = document.getElementById('flowErrorBox');
+    var errorMsg = document.getElementById('flowErrorMsg');
+    var errorRetry = document.getElementById('flowErrorRetry');
+
+    // Laisse vide tant que l'API de génération n'est pas déployée : la page
+    // reste alors en démo simulée. DROLY_API_BASE est l'URL (complète, ou
+    // relative si l'API vit sur le même domaine que ce site) à appeler —
+    // voir api/README.md pour le détail :
+    //   Vercel   : '/api/generate' (chemin relatif, même projet que ce site)
+    //   Render   : 'https://ton-service.onrender.com/api/generate'
+    //   Supabase : 'https://TON-PROJET.supabase.co/functions/v1/generate'
+    //              (mets alors ta clé "anon" dans DROLY_API_KEY ci-dessous —
+    //              Settings > API Keys dans le dashboard Supabase)
+    var DROLY_API_BASE = '';
+    var DROLY_API_KEY = '';
+
+    function showStep(name){
+      stepEls.forEach(function(s){ s.classList.toggle('active', s.getAttribute('data-step') === name); });
+    }
+    function openOverlay(){
+      overlay.classList.add('open');
+      overlay.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeOverlay(){
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+    function isValidUrl(v){
+      try{
+        var u = new URL(v);
+        return u.protocol === 'http:' || u.protocol === 'https:';
+      }catch(e){ return false; }
+    }
+    function clearPreviewVideo(){
+      if(previewVideoEl && previewVideoEl.parentNode){ previewVideoEl.parentNode.removeChild(previewVideoEl); }
+      previewVideoEl = null;
+    }
+    function ensureDemoPreviewVideo(){
+      clearPreviewVideo();
+      if(!previewFrame || !previewCloneSrc) return;
+      previewVideoEl = previewCloneSrc.cloneNode(true);
+      previewVideoEl.removeAttribute('id');
+      previewVideoEl.muted = true;
+      previewVideoEl.setAttribute('muted','');
+      previewVideoEl.autoplay = true;
+      previewVideoEl.loop = true;
+      previewVideoEl.playsInline = true;
+      previewFrame.insertBefore(previewVideoEl, previewFrame.firstChild);
+      var playIt = function(){ previewVideoEl.play().catch(function(){}); };
+      if(previewVideoEl.readyState >= 2){ playIt(); } else { previewVideoEl.addEventListener('loadeddata', playIt, { once:true }); }
+    }
+    function setRealPreviewVideo(url){
+      clearPreviewVideo();
+      if(!previewFrame || !url) return;
+      previewVideoEl = document.createElement('video');
+      previewVideoEl.muted = true;
+      previewVideoEl.setAttribute('muted','');
+      previewVideoEl.autoplay = true;
+      previewVideoEl.loop = true;
+      previewVideoEl.playsInline = true;
+      previewVideoEl.src = url;
+      previewFrame.insertBefore(previewVideoEl, previewFrame.firstChild);
+      previewVideoEl.play().catch(function(){});
+    }
+    function resetTasks(){
+      var tasks = Array.prototype.slice.call(overlay.querySelectorAll('.flow-tasks li'));
+      tasks.forEach(function(t){ t.classList.remove('done','doing'); });
+      return tasks;
+    }
+    function showError(message){
+      if(liveStatus){ liveStatus.style.display = 'none'; }
+      if(errorBox){ errorBox.style.display = 'block'; }
+      if(errorMsg){ errorMsg.textContent = message; }
+    }
+    function hideError(){
+      if(errorBox){ errorBox.style.display = 'none'; }
+    }
+
+    function runDemoGeneration(){
+      showStep('processing');
+      hideError();
+      var tasks = resetTasks();
+      var i = 0;
+      function next(){
+        if(i > 0){ tasks[i-1].classList.remove('doing'); tasks[i-1].classList.add('done'); }
+        if(i < tasks.length){
+          tasks[i].classList.add('doing');
+          i++;
+          setTimeout(next, 650 + Math.random()*450);
+        } else {
+          ensureDemoPreviewVideo();
+          setTimeout(function(){ showStep('preview'); }, 450);
+        }
+      }
+      next();
+    }
+
+    function runLiveGeneration(imageUrl){
+      showStep('processing');
+      hideError();
+      var tasks = resetTasks();
+      var stopped = false;
+      var i = 0;
+      function stepOnce(){
+        if(stopped) return;
+        if(i > 0){ tasks[(i-1) % tasks.length].classList.remove('doing'); tasks[(i-1) % tasks.length].classList.add('done'); }
+        if(i < tasks.length){
+          tasks[i % tasks.length].classList.add('doing');
+        } else {
+          // toutes les étapes visuelles sont faites mais l'API travaille encore
+          if(liveStatus){
+            liveStatus.style.display = 'block';
+            liveStatus.textContent = 'Runway génère la vidéo — ça peut prendre jusqu’à une minute…';
+          }
+        }
+        i++;
+        setTimeout(stepOnce, 650 + Math.random()*450);
+      }
+      stepOnce();
+
+      var liveHeaders = { 'Content-Type': 'application/json' };
+      if(DROLY_API_KEY){
+        liveHeaders.apikey = DROLY_API_KEY;
+        liveHeaders.Authorization = 'Bearer ' + DROLY_API_KEY;
+      }
+      fetch(DROLY_API_BASE, {
+        method: 'POST',
+        headers: liveHeaders,
+        body: JSON.stringify({ imageUrl: imageUrl })
+      }).then(function(resp){
+        return resp.json().then(function(data){
+          if(!resp.ok){ throw new Error(data && data.message ? data.message : ('Erreur ' + resp.status)); }
+          return data;
+        });
+      }).then(function(data){
+        stopped = true;
+        tasks.forEach(function(t){ t.classList.remove('doing'); t.classList.add('done'); });
+        if(liveStatus){ liveStatus.style.display = 'none'; }
+        if(!data.videoUrl){
+          showError('Runway a répondu mais aucune vidéo n’a été trouvée dans la réponse (regarde les logs du serveur — le format de sortie a peut-être changé).');
+          return;
+        }
+        setRealPreviewVideo(data.videoUrl);
+        showStep('preview');
+      }).catch(function(err){
+        stopped = true;
+        showError('La génération a échoué : ' + err.message);
+      });
+    }
+
+    function runGeneration(imageUrl){
+      if(DROLY_API_BASE){
+        runLiveGeneration(imageUrl);
+      } else {
+        runDemoGeneration();
+      }
+    }
+
+    if(errorRetry){
+      errorRetry.addEventListener('click', function(){
+        closeOverlay();
+        if(listingUrl){ listingUrl.focus(); }
+      });
+    }
+
+    if(tryForm){
+      tryForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var val = (listingUrl.value || '').trim();
+        if(!isValidUrl(val)){
+          listingUrl.classList.add('error');
+          tryHint.classList.add('error');
+          tryHint.textContent = 'Collez un lien valide, par exemple https://www.airbnb.fr/rooms/...';
+          listingUrl.focus();
+          return;
+        }
+        listingUrl.classList.remove('error');
+        tryHint.classList.remove('error');
+        tryHint.textContent = 'Aperçu gratuit, sans carte bancaire.';
+        if(flowUrlEcho){ flowUrlEcho.textContent = val; }
+        openOverlay();
+        runGeneration(val);
+      });
+    }
+
+    ['navCta','finalCtaBtn'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el){
+        el.addEventListener('click', function(){
+          setTimeout(function(){ listingUrl && listingUrl.focus(); }, 450);
+        });
+      }
+    });
+
+    var unlockBtn = document.getElementById('flowUnlockBtn');
+    if(unlockBtn){ unlockBtn.addEventListener('click', function(){ showStep('checkout'); }); }
+
+    var retryBtn = document.getElementById('flowRetryBtn');
+    if(retryBtn){
+      retryBtn.addEventListener('click', function(){
+        closeOverlay();
+        if(listingUrl){ listingUrl.value = ''; listingUrl.focus(); }
+      });
+    }
+
+    var cardNum = document.getElementById('cardNumber');
+    if(cardNum){
+      cardNum.addEventListener('input', function(){
+        var digits = cardNum.value.replace(/\D/g,'').slice(0,16);
+        cardNum.value = digits.replace(/(.{4})/g,'$1 ').trim();
+      });
+    }
+    var cardExp = document.getElementById('cardExpiry');
+    if(cardExp){
+      cardExp.addEventListener('input', function(){
+        var digits = cardExp.value.replace(/\D/g,'').slice(0,4);
+        if(digits.length >= 3){ digits = digits.slice(0,2) + '/' + digits.slice(2); }
+        cardExp.value = digits;
+      });
+    }
+    var cardCvc = document.getElementById('cardCvc');
+    if(cardCvc){
+      cardCvc.addEventListener('input', function(){
+        cardCvc.value = cardCvc.value.replace(/\D/g,'').slice(0,4);
+      });
+    }
+
+    var checkoutForm = document.getElementById('checkoutForm');
+    if(checkoutForm){
+      checkoutForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var btn = checkoutForm.querySelector('.flow-submit');
+        btn.disabled = true;
+        btn.textContent = 'Paiement en cours…';
+        setTimeout(function(){
+          showStep('success');
+          btn.disabled = false;
+          btn.textContent = 'S’abonner — 29€/mois';
+        }, 1300);
+      });
+    }
+
+    var downloadBtn = document.getElementById('flowDownloadBtn');
+    if(downloadBtn){
+      downloadBtn.addEventListener('click', function(){
+        if(!previewVideoEl) return;
+        var sourceEl = previewVideoEl.querySelector('source');
+        var srcUrl = (sourceEl && sourceEl.src) || previewVideoEl.currentSrc || previewVideoEl.src;
+        if(!srcUrl) return;
+        var originalLabel = downloadBtn.textContent;
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = 'Préparation…';
+
+        function resetLabel(delay){
+          setTimeout(function(){ downloadBtn.disabled = false; downloadBtn.textContent = originalLabel; }, delay || 2200);
+        }
+        function classicDownload(blob){
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = 'droly-video-sans-filigrane.mp4';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+          downloadBtn.textContent = 'Téléchargement lancé ✓';
+          resetLabel();
+        }
+
+        fetch(srcUrl).then(function(resp){ return resp.blob(); }).then(function(blob){
+          if(window.claude && typeof window.claude.use === 'function'){
+            window.claude.use('downloads').then(function(downloads){
+              if(!downloads){ classicDownload(blob); return; }
+              downloads.save({ filename: 'droly-video-sans-filigrane.mp4', data: blob }).then(function(){
+                downloadBtn.textContent = 'Téléchargement lancé ✓';
+                resetLabel();
+              }).catch(function(err){
+                if(err && err.code === 'declined'){
+                  downloadBtn.textContent = originalLabel;
+                  downloadBtn.disabled = false;
+                } else {
+                  downloadBtn.textContent = 'Réessayer';
+                  resetLabel();
+                }
+              });
+            }).catch(function(){ classicDownload(blob); });
+          } else {
+            classicDownload(blob);
+          }
+        }).catch(function(){
+          // Le fichier vient d'un autre domaine (vidéo Runway réelle) et le
+          // navigateur bloque la lecture cross-origin : on l'ouvre dans un
+          // nouvel onglet pour que le clic droit → enregistrer fonctionne.
+          var opened = window.open(srcUrl, '_blank');
+          downloadBtn.textContent = opened ? 'Ouvert dans un nouvel onglet' : originalLabel;
+          downloadBtn.disabled = false;
+          resetLabel();
+        });
+      });
+    }
+
+    var doneBtn = document.getElementById('flowDoneBtn');
+    if(doneBtn){ doneBtn.addEventListener('click', closeOverlay); }
+
+    var closeBtn = document.getElementById('flowClose');
+    if(closeBtn){ closeBtn.addEventListener('click', closeOverlay); }
+    overlay.addEventListener('click', function(e){ if(e.target === overlay){ closeOverlay(); } });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && overlay.classList.contains('open')){ closeOverlay(); }
+    });
+  })();
+
+  // QUIZ — "découvre combien tes vidéos peuvent te rapporter" (après la vidéo hero)
+  (function(){
+    var quizOverlay = document.getElementById('quizOverlay');
+    if(!quizOverlay) return;
+    var quizContent = document.getElementById('quizContent');
+    var quizProgressFill = document.getElementById('quizProgressFill');
+    var quizBackBtn = document.getElementById('quizBack');
+    var quizCloseBtn = document.getElementById('quizClose');
+    var quizStartBtn = document.getElementById('quizStartBtn');
+    var PRICE_PER_VIDEO = 150;
+    var quizAnswers = {};
+    var quizIndex = 0;
+
+    var quizSteps = [
+      { id: 'welcome', type: 'info',
+        eyebrow: 'BIENVENUE',
+        title: 'Bienvenue dans Droly.',
+        body: 'On va calculer ensemble ce que tes vidéos peuvent te rapporter. Trois minutes, quelques questions, rien d’autre.',
+        cta: 'Suivant' },
+      { id: 'dream', type: 'choice',
+        eyebrow: 'TON OBJECTIF',
+        title: 'Quel est ton objectif avec Droly ?',
+        options: ['Décrocher mon premier mandat vidéo', 'Ajouter un revenu à côté', 'En faire mon activité principale', 'Me démarquer de la concurrence locale'],
+        allowOther: true },
+      { id: 'blocker', type: 'choice',
+        eyebrow: 'CE QUI BLOQUE',
+        title: 'Qu’est-ce qui t’empêche d’y arriver aujourd’hui ?',
+        options: ['Pas de drone ni de matériel', 'Trop cher de sous-traiter à un pro', 'Pas le temps de tourner ou monter', 'Je débute tout juste'],
+        allowOther: true },
+      { id: 'goal', type: 'slider',
+        eyebrow: 'TON OBJECTIF CHIFFRÉ',
+        title: 'Combien de revenu supplémentaire tu veux générer par mois avec tes vidéos ?',
+        min: 100, max: 3000, step: 50, def: 600 },
+      { id: 'diagnosis', type: 'diagnosis',
+        eyebrow: 'ON Y EST',
+        title: 'Il te manque juste l’outil.' }
+    ];
+
+    function tierForValue(v){
+      if(v <= 500) return 'RÉALISTE';
+      if(v <= 1500) return 'ACCESSIBLE';
+      return 'AMBITIEUX';
+    }
+    function esc(s){
+      var d = document.createElement('div');
+      d.textContent = s == null ? '' : String(s);
+      return d.innerHTML;
+    }
+
+    function openQuiz(){
+      quizIndex = 0;
+      quizAnswers = {};
+      quizOverlay.classList.add('open');
+      quizOverlay.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      renderQuizStep();
+    }
+    function closeQuiz(){
+      quizOverlay.classList.remove('open');
+      quizOverlay.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+    function quizGoNext(){
+      if(quizIndex < quizSteps.length - 1){ quizIndex++; renderQuizStep(); }
+    }
+    function quizGoBack(){
+      if(quizIndex > 0){ quizIndex--; renderQuizStep(); }
+    }
+
+    function renderQuizStep(){
+      var step = quizSteps[quizIndex];
+      quizProgressFill.style.width = (quizIndex / (quizSteps.length - 1) * 100) + '%';
+      quizBackBtn.style.display = quizIndex > 0 ? 'inline-flex' : 'none';
+
+      var html = '';
+      if(step.eyebrow){ html += '<p class="quiz-eyebrow">' + step.eyebrow + '</p>'; }
+      html += '<h3 class="quiz-title">' + esc(step.title) + '</h3>';
+
+      if(step.type === 'info'){
+        html += '<p class="quiz-body">' + esc(step.body) + '</p>';
+        html += '<button class="btn-primary flow-block quiz-next" type="button">' + esc(step.cta) + '</button>';
+      } else if(step.type === 'choice'){
+        html += '<div class="quiz-options">';
+        step.options.forEach(function(opt){
+          html += '<button class="quiz-option" type="button" data-value="' + esc(opt) + '"><span class="box"></span>' + esc(opt) + '</button>';
+        });
+        if(step.allowOther){
+          html += '<button class="quiz-option" type="button" data-other="1"><span class="box"></span>Ma réponse n’est pas dans la liste</button>';
+          html += '<input type="text" class="quiz-other-input" id="quizOtherInput" placeholder="Écris-la ici…" style="display:none;">';
+        }
+        html += '</div>';
+        html += '<button class="btn-primary flow-block quiz-next" type="button" id="quizChoiceNext" style="display:none;">Continuer</button>';
+      } else if(step.type === 'slider'){
+        var val = quizAnswers[step.id] || step.def;
+        html += '<div class="quiz-slider-value" id="quizSliderValue">' + val + ' €<span class="quiz-slider-tag" id="quizSliderTag">' + tierForValue(val) + '</span></div>';
+        html += '<input type="range" class="quiz-slider" id="quizSliderInput" min="' + step.min + '" max="' + step.max + '" step="' + step.step + '" value="' + val + '">';
+        html += '<div class="quiz-slider-scale"><span>' + step.min + ' €</span><span>' + step.max + ' € et +</span></div>';
+        html += '<p class="quiz-note" id="quizSliderNote"></p>';
+        html += '<button class="btn-primary flow-block quiz-next" type="button">Continuer</button>';
+      } else if(step.type === 'diagnosis'){
+        var goalVal = Number(quizAnswers.goal) || 600;
+        html += '<div class="quiz-recap">';
+        html += '<div class="quiz-recap-row"><span class="k">Aujourd’hui</span><span class="v">' + esc(quizAnswers.blocker || '—') + '</span></div>';
+        html += '<div class="quiz-recap-row"><span class="k">Ton objectif</span><span class="v">' + esc(quizAnswers.dream || '—') + '</span></div>';
+        html += '</div>';
+        html += '<p class="quiz-body">Viser ' + goalVal + ' € par mois est ' + tierForValue(goalVal).toLowerCase() + ' — Droly s’occupe du tournage et du montage, à toi de trouver les mandats.</p>';
+        html += '<button class="btn-primary flow-block" type="button" id="quizFinishBtn">Créer ma première vidéo</button>';
+      }
+
+      quizContent.innerHTML = html;
+      wireQuizStep(step);
+    }
+
+    function wireQuizStep(step){
+      if(step.type === 'info'){
+        var infoNext = quizContent.querySelector('.quiz-next');
+        if(infoNext){ infoNext.addEventListener('click', quizGoNext); }
+      }
+
+      if(step.type === 'choice'){
+        var options = Array.prototype.slice.call(quizContent.querySelectorAll('.quiz-option'));
+        var otherInput = document.getElementById('quizOtherInput');
+        var choiceNext = document.getElementById('quizChoiceNext');
+        options.forEach(function(optBtn){
+          optBtn.addEventListener('click', function(){
+            options.forEach(function(b){ b.classList.remove('selected'); });
+            optBtn.classList.add('selected');
+            if(optBtn.getAttribute('data-other')){
+              quizAnswers[step.id] = otherInput ? otherInput.value : '';
+              if(otherInput){ otherInput.style.display = 'block'; otherInput.focus(); }
+              if(choiceNext){ choiceNext.style.display = 'block'; }
+            } else {
+              quizAnswers[step.id] = optBtn.getAttribute('data-value');
+              if(otherInput){ otherInput.style.display = 'none'; }
+              if(step.allowOther){
+                if(choiceNext){ choiceNext.style.display = 'block'; }
+              } else {
+                setTimeout(quizGoNext, 280);
+              }
+            }
+          });
+        });
+        if(otherInput){
+          otherInput.addEventListener('input', function(){ quizAnswers[step.id] = otherInput.value; });
+        }
+        if(choiceNext){
+          choiceNext.addEventListener('click', function(){
+            if(quizAnswers[step.id]){ quizGoNext(); }
+          });
+        }
+      }
+
+      if(step.type === 'slider'){
+        var slider = document.getElementById('quizSliderInput');
+        var valueEl = document.getElementById('quizSliderValue');
+        var tagEl = document.getElementById('quizSliderTag');
+        var noteEl = document.getElementById('quizSliderNote');
+        function updateNote(v){
+          var n = Math.max(1, Math.round(v / PRICE_PER_VIDEO));
+          if(noteEl){ noteEl.innerHTML = 'En comptant environ <b>' + PRICE_PER_VIDEO + ' €</b> par vidéo vendue à un propriétaire ou une agence, ça fait <b>' + n + ' vidéo' + (n > 1 ? 's' : '') + ' par mois</b> à produire.'; }
+        }
+        function updateAll(){
+          var v = Number(slider.value);
+          quizAnswers[step.id] = v;
+          if(valueEl && valueEl.childNodes.length){ valueEl.childNodes[0].nodeValue = v + ' €'; }
+          if(tagEl){ tagEl.textContent = tierForValue(v); }
+          updateNote(v);
+        }
+        slider.addEventListener('input', updateAll);
+        updateAll();
+        var sliderNext = quizContent.querySelector('.quiz-next');
+        if(sliderNext){
+          sliderNext.addEventListener('click', function(){
+            quizAnswers[step.id] = Number(slider.value);
+            quizGoNext();
+          });
+        }
+      }
+
+      if(step.type === 'diagnosis'){
+        var finishBtn = document.getElementById('quizFinishBtn');
+        if(finishBtn){
+          finishBtn.addEventListener('click', function(){
+            closeQuiz();
+            setTimeout(function(){
+              var listingUrlEl = document.getElementById('listingUrl');
+              if(listingUrlEl){
+                listingUrlEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function(){ listingUrlEl.focus(); }, 400);
+              }
+            }, 150);
+          });
+        }
+      }
+    }
+
+    if(quizStartBtn){ quizStartBtn.addEventListener('click', openQuiz); }
+    if(quizCloseBtn){ quizCloseBtn.addEventListener('click', closeQuiz); }
+    if(quizBackBtn){ quizBackBtn.addEventListener('click', quizGoBack); }
+    quizOverlay.addEventListener('click', function(e){ if(e.target === quizOverlay){ closeQuiz(); } });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && quizOverlay.classList.contains('open')){ closeQuiz(); }
+    });
+  })();
+
+  var revealEls = document.querySelectorAll('.reveal, .reveal-scale, .reveal-stagger');
+  if('IntersectionObserver' in window && revealEls.length){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+
+})();
+</script>
+</body>
+</html>
