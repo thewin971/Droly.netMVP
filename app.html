@@ -148,6 +148,7 @@ p{line-height:1.6;}
 .thumb{position:relative;width:84px;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.65);color:#fff;font-size:0.9375rem;line-height:1;cursor:pointer;}
+.thumb button.plus{top:auto;bottom:4px;background:var(--accent);color:#fff;}
 
 .progress{display:flex;gap:16px;align-items:flex-start;}
 .progress .timer{font-variant-numeric:tabular-nums;color:var(--ink-mute);font-size:0.8125rem;margin-top:4px;}
@@ -363,9 +364,11 @@ p{line-height:1.6;}
           <p class="hint" id="photoHint" style="margin:8px 0 0;">Une pièce bien éclairée, au format paysage.</p>
           <div class="or">ou</div>
           <div class="field">
-            <label for="photoUrl">Lien direct vers une photo</label>
-            <input type="url" id="photoUrl" inputmode="url" placeholder="https://…/photo.jpg" autocomplete="off">
-            <p class="hint">Sur l’annonce : appui long (ou clic droit) sur une photo → « Copier l’adresse de l’image ».</p>
+            <label for="photoUrl">Lien de l’annonce, ou d’une photo</label>
+            <input type="url" id="photoUrl" inputmode="url" placeholder="https://www.airbnb.fr/rooms/…" autocomplete="off">
+            <button class="btn btn-ghost btn-block" type="button" id="fetchPhotos" style="margin-top:10px;">Chercher les photos de l’annonce</button>
+            <div class="thumbs" id="listingPhotos"></div>
+            <p class="hint">Beaucoup d’annonces (Airbnb, Leboncoin…) interdisent la récupération automatique : si rien ne vient, ouvrez l’annonce, appui long sur la photo → « Enregistrer l’image », puis ajoutez-la ci-dessus.</p>
           </div>
           <div class="field" id="extraField" hidden>
             <label for="extraInput">Autres photos du même endroit (facultatif, 3 au maximum)</label>
@@ -909,6 +912,8 @@ function renderListingHint(){
 // Nouvelle vidéo
 // ---------------------------------------------------------------------------
 var preparedImage = null;   // data:image/jpeg;base64,... prêt à envoyer
+var pickedUrl = null;       // photo choisie dans les photos de l'annonce
+var listingPhotos = [];     // photos trouvées sur la page de l'annonce
 var extraImages = [];       // photos supplémentaires préparées (tours à 360°)
 var MAX_EXTRA = 3;
 // Poids maximum de chaque photo envoyée : l'ensemble reste sous la limite
@@ -958,6 +963,7 @@ function prepareImage(file, maxLength){
 
 function resetDrop(){
   preparedImage = null;
+  pickedUrl = null;
   $('#photoInput').value = '';
   var drop = $('#drop');
   drop.classList.remove('has-photo');
@@ -1048,6 +1054,72 @@ $('#extraInput').addEventListener('change', async function(){
   renderExtras();
 });
 
+// Photos de l'annonce : on demande au serveur les photos publiques de la page.
+var IMAGE_LINK = /\.(jpe?g|png|webp)(\?|$)/i;
+
+$('#fetchPhotos').addEventListener('click', async function(){
+  var link = $('#photoUrl').value.trim();
+  notice('#genMsg', null, '');
+  if (!link) return notice('#genMsg', 'error', 'Collez d’abord le lien de votre annonce.');
+  setBusy(this, true, 'Recherche…');
+  try {
+    var r = await api('/api/listing-photos', { url: link });
+    listingPhotos = r.photos || [];
+    renderListingPhotos(r.reason);
+  } catch (err) {
+    notice('#genMsg', 'error', err.message);
+  } finally {
+    setBusy(this, false);
+  }
+});
+
+function usePhoto(url){
+  preparedImage = null;
+  pickedUrl = url;
+  var d = $('#drop');
+  var old = d.querySelector('img');
+  if (old) old.remove();
+  var img = document.createElement('img');
+  img.src = url; img.alt = 'Photo de l’annonce';
+  d.insertBefore(img, $('#dropTitle'));
+  d.classList.add('has-photo');
+  d.querySelector('.ico').hidden = true;
+  $('#dropTitle').textContent = 'Photo de l’annonce choisie';
+  $('#dropSub').textContent = 'Touchez pour choisir une autre photo';
+  notice('#genMsg', null, '');
+}
+
+function renderListingPhotos(reason){
+  var box = $('#listingPhotos');
+  box.textContent = '';
+  if (!listingPhotos.length){
+    return notice('#genMsg', 'error', reason === 'no_photo' || reason === 'not_a_page'
+      ? 'Aucune photo trouvée sur cette page. Enregistrez la photo depuis l’annonce, puis ajoutez-la avec le bouton du haut.'
+      : 'Ce site ne laisse pas récupérer ses photos automatiquement. Enregistrez la photo depuis l’annonce (appui long → « Enregistrer l’image »), puis ajoutez-la avec le bouton du haut.');
+  }
+  listingPhotos.forEach(function(url, i){
+    var t = document.createElement('div'); t.className = 'thumb';
+    var img = document.createElement('img'); img.src = url; img.alt = 'Photo ' + (i + 1) + ' de l’annonce';
+    img.addEventListener('error', function(){ t.remove(); });
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = '✓';
+    b.setAttribute('aria-label', 'Utiliser la photo ' + (i + 1));
+    b.addEventListener('click', function(){ usePhoto(url); });
+    t.appendChild(img); t.appendChild(b);
+    if (currentKind().kind === 'tour'){
+      var plus = document.createElement('button');
+      plus.type = 'button'; plus.textContent = '+'; plus.className = 'plus';
+      plus.setAttribute('aria-label', 'Ajouter la photo ' + (i + 1) + ' aux photos du même lieu');
+      plus.addEventListener('click', function(){
+        if (extraImages.length >= MAX_EXTRA) return notice('#genMsg', 'error', '3 photos supplémentaires au maximum.');
+        if (extraImages.indexOf(url) === -1) extraImages.push(url);
+        renderExtras();
+      });
+      t.appendChild(plus);
+    }
+    box.appendChild(t);
+  });
+}
+
 var drop = $('#drop');
 ['dragenter', 'dragover'].forEach(function(t){ drop.addEventListener(t, function(){ drop.classList.add('over'); }); });
 ['dragleave', 'drop'].forEach(function(t){ drop.addEventListener(t, function(){ drop.classList.remove('over'); }); });
@@ -1112,12 +1184,15 @@ $('#genForm').addEventListener('submit', async function(e){
   e.preventDefault();
   if (generating) return;
   var link = $('#photoUrl').value.trim();
-  var image = preparedImage || link;
-  if (!image) return notice('#genMsg', 'error', 'Ajoutez une photo, ou collez le lien direct d’une photo.');
-  if (!preparedImage){
+  var image = preparedImage || pickedUrl || link;
+  if (!image) return notice('#genMsg', 'error', 'Ajoutez une photo, ou collez le lien de votre annonce.');
+  if (!preparedImage && !pickedUrl){
     var u;
     try { u = new URL(link); } catch (err) { return notice('#genMsg', 'error', 'Ce lien n’est pas valide.'); }
     if (u.protocol !== 'https:') return notice('#genMsg', 'error', 'Le lien doit commencer par https://');
+    if (!IMAGE_LINK.test(link)){
+      return notice('#genMsg', 'error', 'Ce lien est celui d’une annonce, pas d’une photo : appuyez sur « Chercher les photos de l’annonce », puis choisissez-en une.');
+    }
   }
 
   var k = currentKind();
@@ -1143,6 +1218,8 @@ $('#genForm').addEventListener('submit', async function(e){
     if (keepVariant) keepVariant.checked = true;
     resetDrop();
     extraImages = [];
+    listingPhotos = [];
+    $('#listingPhotos').textContent = '';
     renderExtras();
     applyKind();
     await finishWithVideo(video);

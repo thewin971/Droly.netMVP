@@ -94,6 +94,31 @@ async function ark(path, init, timeoutMs) {
   return data;
 }
 
+// Une photo venant d'une annonce est hébergée sur le site de l'annonce : on la
+// télécharge nous-mêmes et on l'envoie directement à Seedance, sinon certains
+// hébergeurs refusent la demande de Seedance et la vidéo échoue.
+const MAX_REMOTE_IMAGE = 4 * 1024 * 1024;
+
+export async function inlineRemoteImage(image) {
+  if (typeof image !== 'string' || !/^https?:/i.test(image)) return image;
+  try {
+    const res = await fetch(image, {
+      headers: { Accept: 'image/*', 'User-Agent': 'DrolyBot/1.0 (+https://droly.fr)' },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const type = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+    if (!/^image\/(jpeg|jpg|png|webp)$/.test(type)) throw new Error('type ' + type);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (!bytes.length || bytes.length > MAX_REMOTE_IMAGE) throw new Error('taille ' + bytes.length);
+    return 'data:' + (type === 'image/jpg' ? 'image/jpeg' : type) + ';base64,' + Buffer.from(bytes).toString('base64');
+  } catch (err) {
+    // Tant pis : on laisse Seedance essayer de la télécharger lui-même.
+    console.error('[droly-api] photo distante non récupérée :', err && err.message);
+    return image;
+  }
+}
+
 // Prépare la demande envoyée à BytePlus ModelArk.
 export function buildTaskBody({ model, kind, variant, image, extraImages }) {
   const tour = kind === 'tour';
@@ -136,10 +161,11 @@ export function buildTaskBody({ model, kind, variant, image, extraImages }) {
 // Lance une vidéo (720p, sans filigrane ni son) à partir d'une photo.
 // options : { kind: 'travelling' | 'tour', variant: 'exterior' | 'interior', extraImages: [] }
 // Renvoie l'identifiant de la tâche.
-export async function createVideoTask(image, options = {}) {
+export async function createVideoTask(rawImage, options = {}) {
   const kind = options.kind === 'tour' ? 'tour' : 'travelling';
   const variant = options.variant === 'interior' ? 'interior' : 'exterior';
-  const extraImages = kind === 'tour' && Array.isArray(options.extraImages) ? options.extraImages : [];
+  const rawExtras = kind === 'tour' && Array.isArray(options.extraImages) ? options.extraImages : [];
+  const [image, ...extraImages] = await Promise.all([rawImage, ...rawExtras].map(inlineRemoteImage));
   const model = videoModel(kind);
   const send = (refs) => ark(
     '/contents/generations/tasks',

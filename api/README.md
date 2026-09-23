@@ -14,6 +14,7 @@ et installe Stripe et Supabase à chaque déploiement (Seedance est appelé dire
 | `POST /api/sync-checkout` | retour du paiement | vérifie le paiement auprès de Stripe et active l'abonnement immédiatement |
 | `POST /api/stripe-webhook` | Stripe | renouvellements, échecs de paiement, résiliations (signature vérifiée) |
 | `POST /api/billing-portal` | bouton « Gérer mon abonnement » | ouvre l'espace de facturation Stripe du client |
+| `POST /api/listing-photos` | bouton « Chercher les photos de l'annonce » | lit les photos publiques d'une page d'annonce (og:image, données de la page) ; ne contourne rien : si le site refuse, la réponse est vide |
 | `POST /api/generate` | bouton « Générer la vidéo » | abonnés uniquement : réserve dans les limites (plan drone ou tour à 360°), lance Dreamina Seedance, attend ~30 s |
 | `POST /api/generation-status` | la page, toutes les 5 s | suit une vidéo encore en cours ; dès qu'elle est prête : stockage privé → « Mes vidéos » |
 

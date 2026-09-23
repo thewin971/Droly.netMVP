@@ -313,4 +313,5 @@ subscription » (3c) en mode live.
 | « Gérer mon abonnement » affiche une erreur Stripe | portail client pas enregistré | étape 3c (en test ET en live) |
 | La génération échoue | photo refusée par Seedance (sa modération refuse certaines images), crédits épuisés, pack acheté pour un autre modèle, ou modèle non activé | essayer une autre photo (paysage, bien éclairée) ; vérifier dans BytePlus ModelArk que **les deux** modèles sont activés et que le pack correspond bien au modèle utilisé (étape 3bis) ; le message exact est dans les logs Vercel |
 | Seuls les tours à 360° échouent | modèle des tours non activé, ou pack acheté pour un autre modèle | étape 3bis : activer Dreamina Seedance 2.0 Mini et acheter son pack ; ou choisir un autre modèle dans `SEEDANCE_TOUR_MODEL` |
+| « Ce site ne laisse pas récupérer ses photos » | l'annonce (Airbnb, Leboncoin…) refuse les robots : c'est normal et prévu | enregistrer la photo depuis l'annonce (appui long → « Enregistrer l'image ») puis l'ajouter depuis l'appareil |
 | Autre erreur | — | Vercel → **Deployments** → dernier déploiement → **Logs** : le message exact y est |
