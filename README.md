@@ -1,100 +1,63 @@
 # Droly
 
-MVP d'un service qui transforme les photos d'une annonce immobilière (Airbnb,
-Leboncoin…) en vidéo de visite façon travelling drone. Concept d'exploration
-inspiré de dronly.co, non affilié.
+Service qui transforme les photos d'une annonce immobilière (Airbnb, Leboncoin…) en vidéo de
+visite façon travelling, vendu par abonnement (29 €/mois). Concept d'exploration inspiré de
+dronly.co, non affilié.
+
+**Pour tout mettre en route (paiements, comptes clients) : suis [SETUP.md](SETUP.md), pas à pas.**
 
 ## Ce qu'il y a dans ce repo
 
 ```
 droly/
-├── index.html        ← le site (page d'accueil, essai, questionnaire, paiement démo)
-├── package.json       ← utilisé par Vercel pour installer le SDK Runway de api/generate.js
-├── videos/            ← les 5 vidéos de démonstration utilisées par le site
-│   ├── hero.mp4
-│   ├── salon.mp4
-│   ├── cuisine.mp4
-│   ├── piscine.mp4
-│   └── drone.mp4
-├── api/                ← fonction Vercel qui génère de VRAIES vidéos (API Runway)
-│   ├── generate.js
-│   └── README.md        ← instructions détaillées pour cette partie
-└── supabase/            ← même chose, en alternative, à héberger sur Supabase
-    ├── functions/generate/index.ts
-    └── README.md         ← instructions détaillées pour cette partie
+├── index.html          ← page d'accueil (présentation, aperçu d'exemple, questionnaire)
+├── app.html            ← espace client : compte, abonnement, génération, mes vidéos
+├── videos/             ← les 5 vidéos de démonstration de la page d'accueil
+├── api/                ← fonctions serveur, exécutées par Vercel
+│   ├── _shared.js          outils communs (non publié comme adresse)
+│   ├── config.js           GET  /api/config           réglages publics + diagnostic
+│   ├── create-checkout.js  POST /api/create-checkout  ouvre le paiement Stripe
+│   ├── sync-checkout.js    POST /api/sync-checkout    active l'abonnement au retour du paiement
+│   ├── stripe-webhook.js   POST /api/stripe-webhook   reçoit les événements Stripe
+│   ├── billing-portal.js   POST /api/billing-portal   factures / carte / résiliation (Stripe)
+│   ├── generate.js         POST /api/generate         lance une vidéo (abonnés uniquement, limites incluses)
+│   ├── generation-status.js POST /api/generation-status suit une vidéo en cours jusqu'à ce qu'elle soit prête
+│   ├── _generation.js      outils de génération communs (non publié comme adresse)
+│   └── README.md
+├── supabase/
+│   ├── schema.sql          tables + règles de sécurité + stockage, à coller dans Supabase
+│   └── README.md
+├── package.json        ← dépendances des fonctions (installées automatiquement par Vercel)
+├── .env.example        ← liste des variables à renseigner dans Vercel
+└── SETUP.md            ← guide de mise en route
 ```
 
-`api/` (Vercel) et `supabase/` font exactement la même chose (parler à
-Runway pour générer la vidéo) sur deux hébergeurs différents — choisis-en
-un seul, selon les instructions de son README. Si le site est déjà
-déployé sur Vercel, `api/` est le plus simple : tout vit au même endroit,
-un seul tableau de bord.
+## Parcours client
 
-Le site (`index.html` + `videos/`) fonctionne seul, sans rien installer :
-c'est du HTML/CSS/JS pur, aucune dépendance. Les vidéos sont de vrais
-fichiers `.mp4` référencés en local (`videos/hero.mp4`, etc.) — pas de lien
-externe qui peut casser.
+1. Sur l'accueil, le visiteur colle le lien de son annonce et voit un **exemple de rendu** (gratuit).
+2. **Créer mon compte** → `app.html` : inscription (email + mot de passe).
+3. **S'abonner** → page de paiement **Stripe** (la carte n'est jamais saisie sur Droly).
+4. Retour sur l'espace client, abonnement actif :
+   - **Nouvelle vidéo** : une photo (ou un lien direct vers une photo) → vidéo générée par Dreamina Seedance (BytePlus),
+     au choix **Plan drone** (la caméra avance, 5 s, en général 1 à 3 minutes) ou **Tour à 360°** de la maison ou d'une pièce
+     (la caméra fait le tour complet, 10 s, 2 à 5 minutes, avec jusqu'à 3 photos du même lieu pour un rendu plus fidèle),
+     avec le nombre de vidéos et de tours restants affiché ; une génération longue ou interrompue est reprise automatiquement ;
+   - **Mes vidéos** : toutes ses vidéos, à revoir, télécharger ou supprimer ;
+   - **Abonnement** : statut, date de renouvellement, et accès à l'espace Stripe (factures, carte, résiliation).
 
-## Voir le site en local avant de publier
+## Sécurité
 
-Le plus fiable est de lancer un petit serveur local (les navigateurs sont
-parfois capricieux avec les vidéos ouvertes en double-clic direct) :
+- Les clés secrètes (Stripe, Supabase `secret`, Seedance) ne sont **que** dans les variables d'environnement
+  Vercel, jamais dans le code ni sur GitHub.
+- Seuls les clients connectés **et** abonnés peuvent générer une vidéo (tes crédits Seedance sont protégés),
+  avec des limites réglables (`MAX_VIDEOS_PER_MONTH`, `MAX_VIDEOS_PER_DAY`, `MAX_TOURS_PER_MONTH`) tenues dans un registre que le client
+  ne peut pas modifier, et vérifiées de façon atomique (impossible à dépasser, même avec des demandes simultanées).
+- Chaque client ne voit et ne supprime que **ses** vidéos (règles de sécurité Supabase). Un abonnement ne
+  peut être activé que par Stripe (webhook signé ou vérification du paiement auprès de Stripe), jamais deux
+  abonnements en même temps, et un abonnement de test ne donne jamais accès en mode réel.
+- Les vidéos sont stockées dans un espace privé ; les liens de lecture/téléchargement expirent au bout d'une heure.
 
-```bash
-cd droly
-python3 -m http.server 8000
-# puis ouvre http://localhost:8000 dans ton navigateur
-```
+## Hébergement
 
-(Ou n'importe quel autre serveur statique : `npx serve`, l'extension "Live
-Server" de VS Code, etc. Double-cliquer sur `index.html` fonctionne aussi
-dans la plupart des navigateurs.)
-
-## Publier sur GitHub (avec les vidéos qui marchent)
-
-1. Crée un nouveau repo sur GitHub (vide, sans README ni .gitignore générés
-   automatiquement — ce dossier en a déjà, et il est déjà initialisé en Git
-   avec un premier commit sur la branche `main`, prêt à pousser).
-2. Dans ce dossier `droly/`, connecte-le à ton repo et pousse :
-   ```bash
-   git remote add origin https://github.com/TON-COMPTE/TON-REPO.git
-   git push -u origin main
-   ```
-3. Une fois poussé, va dans **Settings → Pages** de ton repo GitHub.
-4. Dans "Build and deployment" → Source, choisis **Deploy from a branch**,
-   branche **main**, dossier **/ (root)**. Enregistre.
-5. GitHub te donne une adresse du style
-   `https://TON-COMPTE.github.io/TON-REPO/` — le site (et les vidéos) sont
-   en ligne dessus après 1 à 2 minutes.
-
-Comme les vidéos sont de vrais fichiers dans `videos/` (pas des liens
-externes ni du texte encodé dans la page), elles se chargent normalement,
-en streaming, comme n'importe quelle vidéo web — GitHub Pages les sert
-sans problème.
-
-## Mode démo vs mode réel
-
-Par défaut, le bouton "Essayer" simule une génération (démo, pour montrer
-le principe sans rien payer). Pour brancher la vraie génération de vidéo
-(API Runway), choisis un des deux dossiers :
-
-- **`api/`** (hébergé sur Render) — voir `api/README.md`, pas à pas complet.
-- **`supabase/`** (hébergé sur Supabase, tout depuis le dashboard, sans
-  terminal) — voir `supabase/README.md`, pas à pas complet.
-
-Dans les deux cas, la dernière étape est la même : ouvrir `index.html` et
-remplir `DROLY_API_BASE` (et `DROLY_API_KEY` pour la variante Supabase)
-avec les valeurs données par l'hébergeur choisi (`/api/generate` pour
-Vercel, une adresse complète pour Render/Supabase).
-
-Sans cette étape, le site fonctionne quand même très bien en démo — rien
-n'est cassé si tu ne déploies aucune des deux.
-
-## Notes
-
-- Aucune carte bancaire n'est réellement débitée nulle part dans ce MVP —
-  le formulaire de paiement est une simulation, clairement indiquée comme
-  telle sur la page.
-- La clé API Runway (si tu l'utilises) ne doit jamais être mise dans
-  `index.html` ni commit dans Git — elle reste côté serveur (`api/.env`,
-  qui est ignoré par `.gitignore`).
+Le site **doit être servi par Vercel** : les fonctions du dossier `api/` ne tournent pas sur GitHub Pages.
+L'accueil (`index.html`) s'affiche partout, mais l'espace client a besoin de Vercel.

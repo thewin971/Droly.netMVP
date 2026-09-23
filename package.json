@@ -2,8 +2,9 @@
   "name": "droly",
   "private": true,
   "type": "module",
-  "description": "Site Droly (statique) + fonction API Vercel (api/generate.js) qui appelle Runway.",
+  "description": "Site Droly + espace client + fonctions API Vercel (Stripe, Supabase, Dreamina Seedance).",
   "dependencies": {
-    "@runwayml/sdk": "latest"
+    "@supabase/supabase-js": "^2.116.0",
+    "stripe": "^22.6.2"
   }
 }

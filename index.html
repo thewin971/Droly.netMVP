@@ -69,6 +69,9 @@ section[id]{scroll-margin-top:90px;}
 .nav-links a:hover{color:var(--ink);}
 .nav-cta{display:inline-block;padding:10px 20px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:0.9375rem;transition:background .15s ease;}
 .nav-cta:hover{background:var(--accent-2);}
+.nav-right{display:flex;align-items:center;gap:18px;}
+.nav-login{font-size:0.9375rem;color:var(--ink-dim);}
+.nav-login:hover{color:var(--ink);}
 @media (max-width:760px){ .nav-links{display:none;} }
 
 /* HERO */
@@ -252,6 +255,21 @@ section[id]{scroll-margin-top:90px;}
 .quote-card p{font-family:var(--serif);font-weight:500;font-size:1.0625rem;line-height:1.45;margin:0 0 18px;}
 .quote-card .who{font-size:0.8125rem;color:var(--ink-mute);}
 
+/* DEUX FORMATS */
+.formats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media (max-width:760px){ .formats-grid{grid-template-columns:1fr;} }
+.format-card{border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;background:var(--bg-elev);display:flex;flex-direction:column;}
+.format-media{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000;}
+.format-media video{width:100%;height:100%;object-fit:cover;display:block;}
+.format-360{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 45%, rgba(255,90,95,0.22), transparent 62%), var(--bg-elev-2);}
+.format-360 .ring{position:absolute;width:58%;aspect-ratio:1/1;border:1px dashed rgba(255,255,255,0.45);border-radius:50%;animation:spin 16s linear infinite;}
+.format-360 .ring span{position:absolute;top:-6px;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px rgba(255,90,95,0.22);}
+.format-360 .label{position:relative;font-family:var(--serif);font-size:1.75rem;font-weight:600;color:#FFFFFF;}
+.format-body{padding:22px 22px 24px;}
+.format-body .tag{display:inline-block;font-size:0.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.format-body h3{font-family:var(--serif);font-size:1.25rem;font-weight:600;margin:0 0 10px;}
+.format-body p{color:var(--ink-dim);font-size:0.9375rem;line-height:1.6;margin:0;}
+
 @keyframes spin{to{transform:rotate(360deg);}}
 
 /* FINAL CTA */
@@ -307,7 +325,10 @@ section[id]{scroll-margin-top:90px;}
     <nav class="nav-links" aria-label="Navigation principale">
       <a href="#comment">Comment ça marche</a>
     </nav>
-    <a class="nav-cta" href="#top" id="navCta">Essayer</a>
+    <div class="nav-right">
+      <a class="nav-login" href="app.html">Mon espace</a>
+      <a class="nav-cta" href="#top" id="navCta">Essayer</a>
+    </div>
   </div>
 </header>
 
@@ -386,6 +407,36 @@ section[id]{scroll-margin-top:90px;}
     </div>
   </section>
 
+  <section class="formats border-top" id="formats">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Deux formats, à partir des mêmes photos</h2>
+        <p>Vous choisissez le mouvement de caméra au moment de créer la vidéo.</p>
+      </div>
+      <div class="formats-grid reveal-stagger">
+        <article class="format-card">
+          <div class="format-media"><video autoplay muted loop playsinline preload="auto"><source src="videos/drone.mp4" type="video/mp4"></video></div>
+          <div class="format-body">
+            <span class="tag">Plan drone · 5 s</span>
+            <h3>La caméra s’approche</h3>
+            <p>Un mouvement lent et régulier vers le bien ou dans la pièce, comme un drone qui s’avance. C’est le format à utiliser pour la plupart des annonces.</p>
+          </div>
+        </article>
+        <article class="format-card">
+          <div class="format-media format-360" aria-hidden="true">
+            <div class="ring"><span></span></div>
+            <div class="label">360°</div>
+          </div>
+          <div class="format-body">
+            <span class="tag">Tour à 360° · 10 s</span>
+            <h3>La caméra fait le tour</h3>
+            <p>Un tour complet autour de la maison, ou sur elle-même au milieu d’une pièce, qui revient à son point de départ. Ajoutez d’autres photos du même endroit : le tour sera plus fidèle.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="proof border-top">
     <div class="wrap">
       <div class="section-head reveal">
@@ -418,6 +469,7 @@ section[id]{scroll-margin-top:90px;}
       </div>
       <div class="footer-links">
         <a href="#comment">Comment ça marche</a>
+        <a href="app.html">Mon espace</a>
         <a href="#top">Haut de page</a>
       </div>
     </div>
@@ -430,77 +482,37 @@ section[id]{scroll-margin-top:90px;}
     <button class="flow-close" id="flowClose" type="button" aria-label="Fermer">✕</button>
 
     <div class="flow-step" data-step="processing">
-      <p class="flow-eyebrow">Étape 1 / 3</p>
+      <p class="flow-eyebrow">Étape 1 / 2</p>
       <div class="flow-spinner" aria-hidden="true"></div>
-      <h3>Génération de votre aperçu…</h3>
+      <h3>Préparation de votre aperçu…</h3>
       <ul class="flow-tasks" id="flowTasks">
-        <li data-task="fetch">Récupération des photos de l’annonce</li>
-        <li data-task="analyze">Repérage des pièces</li>
-        <li data-task="camera">Génération des mouvements de caméra</li>
-        <li data-task="render">Rendu de la vidéo</li>
+        <li data-task="fetch">Lecture du lien de l’annonce</li>
+        <li data-task="camera">Choix des mouvements de caméra</li>
+        <li data-task="render">Assemblage d’un exemple de rendu</li>
       </ul>
-      <p class="flow-live-status" id="flowLiveStatus" style="display:none;font-size:0.8125rem;color:var(--ink-mute);margin:18px 0 0;"></p>
-      <div id="flowErrorBox" style="display:none;margin-top:18px;">
-        <p style="color:var(--error);font-size:0.875rem;margin:0 0 14px;" id="flowErrorMsg"></p>
-        <button class="btn-primary flow-block" id="flowErrorRetry" type="button">Réessayer</button>
-      </div>
     </div>
 
     <div class="flow-step" data-step="preview">
-      <p class="flow-eyebrow">Étape 2 / 3</p>
-      <span class="flow-badge">Aperçu généré</span>
+      <p class="flow-eyebrow">Étape 2 / 2</p>
+      <span class="flow-badge">Exemple de rendu</span>
       <div class="flow-preview-frame" id="flowPreviewFrame">
-        <span class="flow-watermark">APERÇU DROLY</span>
+        <span class="flow-watermark">EXEMPLE DROLY</span>
       </div>
-      <h3>Votre vidéo est prête</h3>
-      <p class="flow-url-echo">Générée depuis : <span id="flowUrlEcho"></span></p>
-      <button class="btn-primary flow-block" id="flowUnlockBtn" type="button">Débloquer le fichier sans filigrane</button>
-      <button class="link-secondary flow-block" id="flowRetryBtn" type="button" style="background:none;border:none;cursor:pointer;">Essayer un autre lien</button>
-    </div>
-
-    <div class="flow-step" data-step="checkout">
-      <p class="flow-eyebrow">Étape 3 / 3</p>
-      <h3>Débloquer ce fichier</h3>
+      <h3>Voici le type de vidéo que vous obtiendrez</h3>
+      <p class="flow-url-echo">Pour l’annonce : <span id="flowUrlEcho"></span></p>
+      <p>Créez votre compte et abonnez-vous pour générer la vraie vidéo de cette annonce, sans filigrane.</p>
       <div class="flow-plan">
         <div>
           <div class="name">Abonnement Droly Créateur</div>
-          <div class="sub">Vidéos illimitées, sans filigrane</div>
+          <div class="sub">Vidéos sans filigrane, sans engagement</div>
         </div>
         <div class="price">29€<span style="font-size:0.75rem;color:var(--ink-mute);font-weight:500;">/mois</span></div>
       </div>
-      <form id="checkoutForm">
-        <div class="flow-fields">
-          <div>
-            <label for="ccName">Nom sur la carte</label>
-            <input type="text" id="ccName" placeholder="Prénom Nom" autocomplete="cc-name" required>
-          </div>
-          <div>
-            <label for="cardNumber">Numéro de carte</label>
-            <input type="text" id="cardNumber" inputmode="numeric" placeholder="1234 1234 1234 1234" maxlength="19" autocomplete="cc-number" required>
-          </div>
-          <div class="flow-row">
-            <div>
-              <label for="cardExpiry">Expiration</label>
-              <input type="text" id="cardExpiry" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp" required>
-            </div>
-            <div>
-              <label for="cardCvc">CVC</label>
-              <input type="text" id="cardCvc" inputmode="numeric" placeholder="123" maxlength="4" autocomplete="cc-csc" required>
-            </div>
-          </div>
-        </div>
-        <button class="btn-primary flow-block flow-submit" type="submit" style="margin-top:6px;">S’abonner — 29€/mois</button>
-      </form>
-      <p class="flow-secure">Démo — aucune donnée bancaire n’est transmise ni conservée.</p>
+      <a class="btn-primary flow-block" id="flowUnlockBtn" href="app.html?signup=1">Créer mon compte</a>
+      <button class="link-secondary flow-block" id="flowRetryBtn" type="button" style="background:none;border:none;cursor:pointer;">Essayer un autre lien</button>
+      <p class="flow-secure">Paiement sécurisé par Stripe. Résiliable à tout moment.</p>
     </div>
 
-    <div class="flow-step" data-step="success">
-      <div class="flow-success-icon" aria-hidden="true">✓</div>
-      <h3>Paiement confirmé</h3>
-      <p>Votre vidéo sans filigrane est prête à être livrée à votre client.</p>
-      <button class="btn-primary flow-block" id="flowDownloadBtn" type="button">Télécharger la vidéo (.mp4)</button>
-      <button class="link-secondary flow-block" id="flowDoneBtn" type="button" style="background:none;border:none;cursor:pointer;">Fermer</button>
-    </div>
   </div>
 </div>
 
@@ -556,22 +568,7 @@ section[id]{scroll-margin-top:90px;}
     var previewFrame = document.getElementById('flowPreviewFrame');
     var previewCloneSrc = document.getElementById('heroVideo');
     var previewVideoEl = null;
-    var liveStatus = document.getElementById('flowLiveStatus');
-    var errorBox = document.getElementById('flowErrorBox');
-    var errorMsg = document.getElementById('flowErrorMsg');
-    var errorRetry = document.getElementById('flowErrorRetry');
 
-    // Laisse vide tant que l'API de génération n'est pas déployée : la page
-    // reste alors en démo simulée. DROLY_API_BASE est l'URL (complète, ou
-    // relative si l'API vit sur le même domaine que ce site) à appeler —
-    // voir api/README.md pour le détail :
-    //   Vercel   : '/api/generate' (chemin relatif, même projet que ce site)
-    //   Render   : 'https://ton-service.onrender.com/api/generate'
-    //   Supabase : 'https://TON-PROJET.supabase.co/functions/v1/generate'
-    //              (mets alors ta clé "anon" dans DROLY_API_KEY ci-dessous —
-    //              Settings > API Keys dans le dashboard Supabase)
-    var DROLY_API_BASE = '';
-    var DROLY_API_KEY = '';
 
     function showStep(name){
       stepEls.forEach(function(s){ s.classList.toggle('active', s.getAttribute('data-step') === name); });
@@ -610,36 +607,14 @@ section[id]{scroll-margin-top:90px;}
       var playIt = function(){ previewVideoEl.play().catch(function(){}); };
       if(previewVideoEl.readyState >= 2){ playIt(); } else { previewVideoEl.addEventListener('loadeddata', playIt, { once:true }); }
     }
-    function setRealPreviewVideo(url){
-      clearPreviewVideo();
-      if(!previewFrame || !url) return;
-      previewVideoEl = document.createElement('video');
-      previewVideoEl.muted = true;
-      previewVideoEl.setAttribute('muted','');
-      previewVideoEl.autoplay = true;
-      previewVideoEl.loop = true;
-      previewVideoEl.playsInline = true;
-      previewVideoEl.src = url;
-      previewFrame.insertBefore(previewVideoEl, previewFrame.firstChild);
-      previewVideoEl.play().catch(function(){});
-    }
     function resetTasks(){
       var tasks = Array.prototype.slice.call(overlay.querySelectorAll('.flow-tasks li'));
       tasks.forEach(function(t){ t.classList.remove('done','doing'); });
       return tasks;
     }
-    function showError(message){
-      if(liveStatus){ liveStatus.style.display = 'none'; }
-      if(errorBox){ errorBox.style.display = 'block'; }
-      if(errorMsg){ errorMsg.textContent = message; }
-    }
-    function hideError(){
-      if(errorBox){ errorBox.style.display = 'none'; }
-    }
 
     function runDemoGeneration(){
       showStep('processing');
-      hideError();
       var tasks = resetTasks();
       var i = 0;
       function next(){
@@ -656,73 +631,6 @@ section[id]{scroll-margin-top:90px;}
       next();
     }
 
-    function runLiveGeneration(imageUrl){
-      showStep('processing');
-      hideError();
-      var tasks = resetTasks();
-      var stopped = false;
-      var i = 0;
-      function stepOnce(){
-        if(stopped) return;
-        if(i > 0){ tasks[(i-1) % tasks.length].classList.remove('doing'); tasks[(i-1) % tasks.length].classList.add('done'); }
-        if(i < tasks.length){
-          tasks[i % tasks.length].classList.add('doing');
-        } else {
-          // toutes les étapes visuelles sont faites mais l'API travaille encore
-          if(liveStatus){
-            liveStatus.style.display = 'block';
-            liveStatus.textContent = 'Runway génère la vidéo — ça peut prendre jusqu’à une minute…';
-          }
-        }
-        i++;
-        setTimeout(stepOnce, 650 + Math.random()*450);
-      }
-      stepOnce();
-
-      var liveHeaders = { 'Content-Type': 'application/json' };
-      if(DROLY_API_KEY){
-        liveHeaders.apikey = DROLY_API_KEY;
-        liveHeaders.Authorization = 'Bearer ' + DROLY_API_KEY;
-      }
-      fetch(DROLY_API_BASE, {
-        method: 'POST',
-        headers: liveHeaders,
-        body: JSON.stringify({ imageUrl: imageUrl })
-      }).then(function(resp){
-        return resp.json().then(function(data){
-          if(!resp.ok){ throw new Error(data && data.message ? data.message : ('Erreur ' + resp.status)); }
-          return data;
-        });
-      }).then(function(data){
-        stopped = true;
-        tasks.forEach(function(t){ t.classList.remove('doing'); t.classList.add('done'); });
-        if(liveStatus){ liveStatus.style.display = 'none'; }
-        if(!data.videoUrl){
-          showError('Runway a répondu mais aucune vidéo n’a été trouvée dans la réponse (regarde les logs du serveur — le format de sortie a peut-être changé).');
-          return;
-        }
-        setRealPreviewVideo(data.videoUrl);
-        showStep('preview');
-      }).catch(function(err){
-        stopped = true;
-        showError('La génération a échoué : ' + err.message);
-      });
-    }
-
-    function runGeneration(imageUrl){
-      if(DROLY_API_BASE){
-        runLiveGeneration(imageUrl);
-      } else {
-        runDemoGeneration();
-      }
-    }
-
-    if(errorRetry){
-      errorRetry.addEventListener('click', function(){
-        closeOverlay();
-        if(listingUrl){ listingUrl.focus(); }
-      });
-    }
 
     if(tryForm){
       tryForm.addEventListener('submit', function(e){
@@ -739,8 +647,9 @@ section[id]{scroll-margin-top:90px;}
         tryHint.classList.remove('error');
         tryHint.textContent = 'Aperçu gratuit, sans carte bancaire.';
         if(flowUrlEcho){ flowUrlEcho.textContent = val; }
+        if(unlockLink){ unlockLink.setAttribute('href', 'app.html?signup=1&listing=' + encodeURIComponent(val)); }
         openOverlay();
-        runGeneration(val);
+        runDemoGeneration();
       });
     }
 
@@ -753,8 +662,7 @@ section[id]{scroll-margin-top:90px;}
       }
     });
 
-    var unlockBtn = document.getElementById('flowUnlockBtn');
-    if(unlockBtn){ unlockBtn.addEventListener('click', function(){ showStep('checkout'); }); }
+    var unlockLink = document.getElementById('flowUnlockBtn');
 
     var retryBtn = document.getElementById('flowRetryBtn');
     if(retryBtn){
@@ -763,105 +671,6 @@ section[id]{scroll-margin-top:90px;}
         if(listingUrl){ listingUrl.value = ''; listingUrl.focus(); }
       });
     }
-
-    var cardNum = document.getElementById('cardNumber');
-    if(cardNum){
-      cardNum.addEventListener('input', function(){
-        var digits = cardNum.value.replace(/\D/g,'').slice(0,16);
-        cardNum.value = digits.replace(/(.{4})/g,'$1 ').trim();
-      });
-    }
-    var cardExp = document.getElementById('cardExpiry');
-    if(cardExp){
-      cardExp.addEventListener('input', function(){
-        var digits = cardExp.value.replace(/\D/g,'').slice(0,4);
-        if(digits.length >= 3){ digits = digits.slice(0,2) + '/' + digits.slice(2); }
-        cardExp.value = digits;
-      });
-    }
-    var cardCvc = document.getElementById('cardCvc');
-    if(cardCvc){
-      cardCvc.addEventListener('input', function(){
-        cardCvc.value = cardCvc.value.replace(/\D/g,'').slice(0,4);
-      });
-    }
-
-    var checkoutForm = document.getElementById('checkoutForm');
-    if(checkoutForm){
-      checkoutForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        var btn = checkoutForm.querySelector('.flow-submit');
-        btn.disabled = true;
-        btn.textContent = 'Paiement en cours…';
-        setTimeout(function(){
-          showStep('success');
-          btn.disabled = false;
-          btn.textContent = 'S’abonner — 29€/mois';
-        }, 1300);
-      });
-    }
-
-    var downloadBtn = document.getElementById('flowDownloadBtn');
-    if(downloadBtn){
-      downloadBtn.addEventListener('click', function(){
-        if(!previewVideoEl) return;
-        var sourceEl = previewVideoEl.querySelector('source');
-        var srcUrl = (sourceEl && sourceEl.src) || previewVideoEl.currentSrc || previewVideoEl.src;
-        if(!srcUrl) return;
-        var originalLabel = downloadBtn.textContent;
-        downloadBtn.disabled = true;
-        downloadBtn.textContent = 'Préparation…';
-
-        function resetLabel(delay){
-          setTimeout(function(){ downloadBtn.disabled = false; downloadBtn.textContent = originalLabel; }, delay || 2200);
-        }
-        function classicDownload(blob){
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement('a');
-          a.href = url;
-          a.download = 'droly-video-sans-filigrane.mp4';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
-          downloadBtn.textContent = 'Téléchargement lancé ✓';
-          resetLabel();
-        }
-
-        fetch(srcUrl).then(function(resp){ return resp.blob(); }).then(function(blob){
-          if(window.claude && typeof window.claude.use === 'function'){
-            window.claude.use('downloads').then(function(downloads){
-              if(!downloads){ classicDownload(blob); return; }
-              downloads.save({ filename: 'droly-video-sans-filigrane.mp4', data: blob }).then(function(){
-                downloadBtn.textContent = 'Téléchargement lancé ✓';
-                resetLabel();
-              }).catch(function(err){
-                if(err && err.code === 'declined'){
-                  downloadBtn.textContent = originalLabel;
-                  downloadBtn.disabled = false;
-                } else {
-                  downloadBtn.textContent = 'Réessayer';
-                  resetLabel();
-                }
-              });
-            }).catch(function(){ classicDownload(blob); });
-          } else {
-            classicDownload(blob);
-          }
-        }).catch(function(){
-          // Le fichier vient d'un autre domaine (vidéo Runway réelle) et le
-          // navigateur bloque la lecture cross-origin : on l'ouvre dans un
-          // nouvel onglet pour que le clic droit → enregistrer fonctionne.
-          var opened = window.open(srcUrl, '_blank');
-          downloadBtn.textContent = opened ? 'Ouvert dans un nouvel onglet' : originalLabel;
-          downloadBtn.disabled = false;
-          resetLabel();
-        });
-      });
-    }
-
-    var doneBtn = document.getElementById('flowDoneBtn');
-    if(doneBtn){ doneBtn.addEventListener('click', closeOverlay); }
 
     var closeBtn = document.getElementById('flowClose');
     if(closeBtn){ closeBtn.addEventListener('click', closeOverlay); }

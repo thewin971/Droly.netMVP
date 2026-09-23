@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0B0A08" />
+<meta name="robots" content="noindex" />
+<title>Mon espace — Droly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0A08;
+  --bg-elev:#15130E;
+  --bg-elev-2:#1D1A13;
+  --ink:#F3EEE2;
+  --ink-dim:#B7AE9A;
+  --ink-mute:#8C836F;
+  --accent:#FF5A5F;
+  --accent-2:#E14850;
+  --accent-ink:#FFFFFF;
+  --accent-b:#00A699;
+  --line:rgba(243,238,226,0.10);
+  --line-strong:rgba(243,238,226,0.20);
+  --error:#e2867a;
+  --success:#5cc9a7;
+  --radius-s:8px;
+  --radius-m:14px;
+  --serif:'Fraunces', serif;
+  --sans:'Work Sans', sans-serif;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;min-height:100vh;
+  background:
+    radial-gradient(600px 420px at 10% -10%, rgba(255,90,95,0.16), transparent 70%),
+    radial-gradient(640px 480px at 100% 110%, rgba(0,166,153,0.14), transparent 70%),
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+a{color:inherit;}
+button,a{touch-action:manipulation;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+[hidden]{display:none !important;}
+
+/* HEADER */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,10,8,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.top .in{max-width:920px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:1.2rem;text-decoration:none;}
+.brand svg{width:22px;height:22px;flex:none;}
+.userbar{display:flex;align-items:center;gap:14px;font-size:0.8125rem;color:var(--ink-mute);min-width:0;}
+.userbar .email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;}
+@media (max-width:520px){ .userbar .email{display:none;} }
+
+main{max-width:920px;margin:0 auto;padding:36px 20px 80px;}
+
+/* COMMON */
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.15;letter-spacing:-0.01em;margin:0 0 12px;}
+h2{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin:0 0 10px;line-height:1.25;}
+p{line-height:1.6;}
+.lead{color:var(--ink-dim);font-size:1rem;margin:0 0 26px;max-width:56ch;}
+.eyebrow{font-size:0.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;}
+.card{background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:18px;padding:30px 28px;box-shadow:0 30px 60px -30px rgba(0,0,0,0.7);}
+.narrow{max-width:440px;margin:0 auto;}
+.muted{color:var(--ink-mute);font-size:0.875rem;}
+.small{font-size:0.8125rem;}
+.center{text-align:center;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:999px;padding:14px 24px;font-family:var(--sans);font-weight:600;font-size:0.9375rem;cursor:pointer;text-decoration:none;transition:background .15s ease,border-color .15s ease,opacity .15s ease;}
+.btn[disabled]{opacity:.6;cursor:default;}
+.btn-primary{background:var(--accent);color:var(--accent-ink);}
+.btn-primary:hover:not([disabled]){background:var(--accent-2);}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line-strong);}
+.btn-ghost:hover:not([disabled]){border-color:var(--ink-dim);}
+.btn-block{display:flex;width:100%;}
+.linkbtn{background:none;border:none;padding:0;color:var(--ink-dim);font-family:var(--sans);font-size:0.875rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.linkbtn:hover{color:var(--ink);}
+
+.field{margin:0 0 16px;}
+.field label{display:block;font-size:0.75rem;color:var(--ink-mute);margin:0 0 6px;}
+.field input{width:100%;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;padding:13px 14px;color:var(--ink);font-family:var(--sans);font-size:1rem;outline:none;transition:border-color .15s ease;}
+.field input:focus{border-color:var(--accent);}
+.field .hint,.hint{font-size:0.75rem;color:var(--ink-mute);margin:6px 0 0;}
+
+.notice{border-radius:12px;padding:13px 16px;font-size:0.875rem;line-height:1.5;margin:0 0 18px;border:1px solid var(--line-strong);background:var(--bg-elev-2);color:var(--ink-dim);}
+.notice.error{border-color:rgba(226,134,122,0.45);background:rgba(226,134,122,0.08);color:#f1b4ab;}
+.notice.success{border-color:rgba(92,201,167,0.45);background:rgba(92,201,167,0.08);color:#9fe3cd;}
+.notice a{color:var(--ink);}
+
+.spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--line-strong);border-top-color:var(--accent);animation:spin .9s linear infinite;}
+.spinner.sm{width:18px;height:18px;border-width:2px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-block{display:flex;flex-direction:column;align-items:center;gap:16px;padding:60px 0;color:var(--ink-dim);}
+
+/* AUTH */
+.seg{display:flex;background:var(--bg);border:1px solid var(--line-strong);border-radius:999px;padding:4px;margin:0 0 24px;}
+.seg button{flex:1;border:none;background:transparent;color:var(--ink-dim);font-family:var(--sans);font-weight:600;font-size:0.875rem;padding:10px 12px;border-radius:999px;cursor:pointer;}
+.seg button[aria-selected="true"]{background:var(--bg-elev-2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-strong);}
+
+/* PLAN */
+.plan{display:flex;justify-content:space-between;align-items:center;gap:16px;background:var(--bg-elev-2);border:1px solid var(--line);border-radius:var(--radius-m);padding:18px 20px;margin:0 0 20px;}
+.plan .name{font-weight:600;}
+.plan .price{color:var(--accent);font-weight:700;font-size:1.25rem;white-space:nowrap;}
+.plan .price small{font-size:0.75rem;color:var(--ink-mute);font-weight:500;}
+.perks{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:10px;}
+.perks li{position:relative;padding-left:28px;font-size:0.9375rem;color:var(--ink-dim);}
+.perks li::before{content:'';position:absolute;left:0;top:3px;width:16px;height:16px;border-radius:50%;background:rgba(255,90,95,0.15);border:1px solid var(--accent);}
+.perks li::after{content:'';position:absolute;left:5px;top:7px;width:6px;height:3px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg);}
+
+/* DASHBOARD */
+.dash-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:0 0 22px;}
+.dash-head h1{margin:0;}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:0 0 28px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tabs button{flex:none;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink-dim);font-family:var(--sans);font-weight:600;font-size:0.9375rem;padding:12px 14px;cursor:pointer;margin-bottom:-1px;}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);}
+.tabs .count{display:inline-block;min-width:20px;padding:1px 7px;margin-left:6px;border-radius:999px;background:var(--bg-elev-2);font-size:0.75rem;color:var(--ink-mute);}
+
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-height:190px;padding:22px;border:1.5px dashed var(--line-strong);border-radius:var(--radius-m);background:var(--bg);cursor:pointer;transition:border-color .15s ease,background .15s ease;overflow:hidden;}
+.drop:hover,.drop.over{border-color:var(--accent);background:rgba(255,90,95,0.04);}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop .ico{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,90,95,0.12);color:var(--accent);font-size:1.3rem;}
+.drop strong{font-size:0.9375rem;}
+.drop img{max-width:100%;max-height:240px;border-radius:10px;display:block;}
+.drop.has-photo{border-style:solid;}
+.or{display:flex;align-items:center;gap:12px;color:var(--ink-mute);font-size:0.75rem;text-transform:uppercase;letter-spacing:.08em;margin:18px 0;}
+.or::before,.or::after{content:'';flex:1;height:1px;background:var(--line);}
+
+.kinds{border:none;margin:0 0 20px;padding:0;display:grid;gap:10px;min-width:0;}
+.kinds legend{font-weight:600;font-size:0.875rem;margin:0 0 10px;padding:0;}
+.kind{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1.5px solid var(--line-strong);border-radius:var(--radius-m);background:var(--bg);cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+.kind.on{border-color:var(--accent);background:rgba(255,90,95,0.04);}
+.kind input{margin:2px 0 0;accent-color:var(--accent);flex:none;width:18px;height:18px;}
+.kind strong{display:block;font-size:0.9375rem;}
+.kind small{display:block;color:var(--ink-mute);font-size:0.8125rem;margin-top:2px;}
+.subchoice{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-8px 0 20px;}
+.subchoice-label{font-size:0.8125rem;color:var(--ink-mute);flex-basis:100%;}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1.5px solid var(--line-strong);border-radius:999px;background:var(--bg);cursor:pointer;font-size:0.8125rem;font-weight:600;}
+.pill.on{border-color:var(--accent);background:rgba(255,90,95,0.06);}
+.pill input{margin:0;accent-color:var(--accent);width:15px;height:15px;}
+.drop.drop-sm{min-height:0;padding:16px;}
+.thumbs{display:flex;gap:10px;flex-wrap:wrap;}
+.thumbs:not(:empty){margin-top:10px;}
+.thumb{position:relative;width:84px;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.65);color:#fff;font-size:0.9375rem;line-height:1;cursor:pointer;}
+
+.progress{display:flex;gap:16px;align-items:flex-start;}
+.progress .timer{font-variant-numeric:tabular-nums;color:var(--ink-mute);font-size:0.8125rem;margin-top:4px;}
+
+.player{position:relative;border-radius:var(--radius-m);overflow:hidden;background:#000;aspect-ratio:16/9;margin:0 0 16px;}
+.player video{width:100%;height:100%;object-fit:contain;display:block;background:#000;}
+.row-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.row-btns .btn{flex:1;min-width:150px;}
+
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;}
+.vcard{background:var(--bg-elev);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;display:flex;flex-direction:column;}
+.vcard .player{margin:0;border-radius:0;}
+.vcard .meta{padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px;flex:1;}
+.vcard .t{font-weight:600;font-size:0.9375rem;word-break:break-word;}
+.vcard .d{font-size:0.75rem;color:var(--ink-mute);margin-top:3px;}
+.vcard .actions{display:flex;gap:8px;margin-top:auto;}
+.vcard .actions .btn{padding:10px 14px;font-size:0.8125rem;}
+.vcard .actions .btn-primary{flex:1;}
+.empty{text-align:center;padding:50px 20px;border:1px dashed var(--line-strong);border-radius:var(--radius-m);}
+.empty p{color:var(--ink-dim);margin:0 0 20px;}
+
+.kv{border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;margin:0 0 22px;}
+.kv > div{display:flex;justify-content:space-between;gap:16px;padding:14px 18px;border-bottom:1px solid var(--line);font-size:0.9375rem;}
+.kv > div:last-child{border-bottom:none;}
+.kv .k{color:var(--ink-mute);}
+.kv .v{text-align:right;font-weight:600;word-break:break-word;}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;border:1px solid var(--line-strong);}
+.badge.ok{color:var(--success);border-color:rgba(92,201,167,0.45);background:rgba(92,201,167,0.08);}
+.badge.warn{color:#f1c27a;border-color:rgba(241,194,122,0.45);background:rgba(241,194,122,0.08);}
+.badge.off{color:var(--ink-mute);}
+
+.checklist{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:6px;font-size:0.875rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.checklist .y{color:var(--success);}
+.checklist .n{color:var(--error);}
+
+@media (max-width:560px){
+  main{padding:26px 16px 70px;}
+  .card{padding:24px 20px;border-radius:16px;}
+  .tabs button{padding:12px 10px;font-size:0.875rem;}
+  .row-btns .btn{min-width:0;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <a class="brand" href="/">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--accent)" stroke-width="1.5"/><circle cx="12" cy="12" r="3.4" fill="var(--accent)"/></svg>
+      Droly
+    </a>
+    <div class="userbar" id="userbar" hidden>
+      <span class="email" id="userEmail"></span>
+      <button class="linkbtn" id="logoutBtn" type="button">Déconnexion</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Chargement -->
+  <section data-view="loading">
+    <div class="loading-block"><div class="spinner" aria-hidden="true"></div><span>Chargement…</span></div>
+  </section>
+
+  <!-- Erreur générale -->
+  <section data-view="error" hidden>
+    <div class="card narrow">
+      <h2>Un problème est survenu</h2>
+      <p class="lead" id="errorText" style="margin-bottom:22px;"></p>
+      <button class="btn btn-primary btn-block" type="button" onclick="location.reload()">Recharger la page</button>
+    </div>
+  </section>
+
+  <!-- Configuration incomplète (visible pendant la mise en place) -->
+  <section data-view="setup" hidden>
+    <div class="card narrow">
+      <p class="eyebrow">Mise en place</p>
+      <h2>L’espace client n’est pas encore prêt</h2>
+      <p class="muted" id="setupText">Il manque des réglages côté serveur. Si vous êtes client, réessayez un peu plus tard.</p>
+      <ul class="checklist" id="setupList"></ul>
+      <div id="setupWarnings"></div>
+      <p class="small muted">Propriétaire du site : suivez le guide SETUP.md, puis rechargez cette page.</p>
+    </div>
+  </section>
+
+  <!-- Connexion / inscription -->
+  <section data-view="auth" hidden>
+    <div class="narrow">
+      <p class="eyebrow center">Espace client</p>
+      <h1 class="center" id="authTitle">Créez votre compte</h1>
+      <p class="lead center" id="authLead" style="margin-left:auto;margin-right:auto;">Pour générer vos vidéos, les retrouver et gérer votre abonnement.</p>
+      <div class="card">
+        <div class="seg" role="tablist" id="authSeg">
+          <button type="button" role="tab" data-mode="signup" aria-selected="true">Créer un compte</button>
+          <button type="button" role="tab" data-mode="login" aria-selected="false">Se connecter</button>
+        </div>
+        <div id="authMsg" aria-live="polite"></div>
+        <form id="authForm" novalidate>
+          <div class="field">
+            <label for="authEmail">Email</label>
+            <input type="email" id="authEmail" autocomplete="email" inputmode="email" required>
+          </div>
+          <div class="field" id="passwordField">
+            <label for="authPassword">Mot de passe</label>
+            <input type="password" id="authPassword" autocomplete="new-password" minlength="8" required>
+            <p class="hint" id="passwordHint">8 caractères minimum.</p>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" id="authSubmit">Créer mon compte</button>
+        </form>
+        <p class="center" style="margin:18px 0 0;">
+          <button class="linkbtn" type="button" id="forgotBtn" hidden>Mot de passe oublié ?</button>
+          <button class="linkbtn" type="button" id="backToLoginBtn" hidden>Retour à la connexion</button>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Nouveau mot de passe (lien reçu par email) -->
+  <section data-view="reset" hidden>
+    <div class="card narrow">
+      <p class="eyebrow">Mot de passe</p>
+      <h2>Choisissez un nouveau mot de passe</h2>
+      <div id="resetMsg" aria-live="polite"></div>
+      <form id="resetForm" novalidate>
+        <div class="field">
+          <label for="newPassword">Nouveau mot de passe</label>
+          <input type="password" id="newPassword" autocomplete="new-password" minlength="8" required>
+          <p class="hint">8 caractères minimum.</p>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="resetSubmit">Enregistrer</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Abonnement nécessaire -->
+  <section data-view="subscribe" hidden>
+    <div class="narrow">
+      <p class="eyebrow center">Dernière étape</p>
+      <h1 class="center" id="subTitle">Activez votre abonnement</h1>
+      <p class="lead center" id="subLead" style="margin-left:auto;margin-right:auto;">Générez les vidéos de vos annonces, sans filigrane, prêtes à livrer à vos clients.</p>
+      <div class="card">
+        <div id="subMsg" aria-live="polite"></div>
+        <div class="plan">
+          <div>
+            <div class="name">Abonnement Droly Créateur</div>
+            <div class="muted small">Sans engagement</div>
+          </div>
+          <div class="price">29€<small>/mois</small></div>
+        </div>
+        <ul class="perks">
+          <li>Vidéos sans filigrane, prêtes à livrer</li>
+          <li>Générées depuis les photos de vos annonces</li>
+          <li>Toutes vos vidéos rangées dans votre espace</li>
+          <li>Résiliable à tout moment, en deux clics</li>
+        </ul>
+        <button class="btn btn-primary btn-block" type="button" id="subscribeBtn">S’abonner — 29€/mois</button>
+        <button class="btn btn-ghost btn-block" type="button" id="fixPaymentBtn" hidden style="margin-top:10px;">Mettre à jour mon moyen de paiement</button>
+        <p class="muted small center" style="margin:16px 0 0;">Paiement sécurisé par Stripe. Votre carte n’est jamais enregistrée sur Droly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activation après paiement -->
+  <section data-view="activating" hidden>
+    <div class="card narrow center">
+      <div class="loading-block" style="padding:20px 0 10px;"><div class="spinner" aria-hidden="true"></div></div>
+      <h2>Paiement reçu, activation de votre abonnement…</h2>
+      <p class="muted">Quelques secondes, ne fermez pas la page.</p>
+    </div>
+  </section>
+
+  <!-- Tableau de bord -->
+  <section data-view="dashboard" hidden>
+    <div class="dash-head">
+      <div>
+        <p class="eyebrow">Espace client</p>
+        <h1>Mes vidéos Droly</h1>
+      </div>
+    </div>
+    <div id="dashMsg" aria-live="polite"></div>
+    <nav class="tabs" role="tablist" id="dashTabs">
+      <button type="button" role="tab" data-tab="generer" aria-selected="true">Nouvelle vidéo</button>
+      <button type="button" role="tab" data-tab="videos" aria-selected="false">Mes vidéos<span class="count" id="videoCount">0</span></button>
+      <button type="button" role="tab" data-tab="abonnement" aria-selected="false">Abonnement</button>
+    </nav>
+
+    <!-- Onglet : nouvelle vidéo -->
+    <div data-panel="generer">
+      <div class="card" id="genFormCard">
+        <h2>Créer une vidéo</h2>
+        <p class="muted" style="margin:0 0 8px;">Choisissez le type de vidéo, puis ajoutez une photo de l’annonce, bien éclairée et au format paysage.</p>
+        <p class="muted small" id="quotaLine" style="margin:0 0 20px;" hidden></p>
+        <div id="listingHint"></div>
+        <div id="genMsg" aria-live="polite"></div>
+        <form id="genForm" novalidate>
+          <fieldset class="kinds" id="kindPicker">
+            <legend>Type de vidéo</legend>
+            <label class="kind on"><input type="radio" name="videoKind" value="travelling" checked><span><strong>Plan drone</strong><small>La caméra avance doucement vers le bien ou dans la pièce · 5 s</small></span></label>
+            <label class="kind"><input type="radio" name="videoKind" value="tour"><span><strong>Tour à 360°</strong><small>La caméra fait le tour complet et revient à son point de départ · 10 s</small></span></label>
+          </fieldset>
+          <div class="subchoice" id="variantPicker" hidden>
+            <span class="subchoice-label">Le tour se fait :</span>
+            <label class="pill on"><input type="radio" name="tourVariant" value="exterior" checked><span>autour de la maison</span></label>
+            <label class="pill"><input type="radio" name="tourVariant" value="interior"><span>dans une pièce</span></label>
+          </div>
+          <label class="drop" id="drop">
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/*">
+            <span class="ico" aria-hidden="true">＋</span>
+            <strong id="dropTitle">Choisir une photo</strong>
+            <span class="muted small" id="dropSub">Depuis votre téléphone ou votre ordinateur (JPEG, PNG, WebP)</span>
+          </label>
+          <p class="hint" id="photoHint" style="margin:8px 0 0;">Une pièce bien éclairée, au format paysage.</p>
+          <div class="or">ou</div>
+          <div class="field">
+            <label for="photoUrl">Lien direct vers une photo</label>
+            <input type="url" id="photoUrl" inputmode="url" placeholder="https://…/photo.jpg" autocomplete="off">
+            <p class="hint">Sur l’annonce : appui long (ou clic droit) sur une photo → « Copier l’adresse de l’image ».</p>
+          </div>
+          <div class="field" id="extraField" hidden>
+            <label for="extraInput">Autres photos du même endroit (facultatif, 3 au maximum)</label>
+            <label class="drop drop-sm" id="extraDrop">
+              <input type="file" id="extraInput" accept="image/jpeg,image/png,image/webp,image/*" multiple>
+              <strong id="extraTitle">Ajouter des photos</strong>
+              <span class="muted small">D’autres angles du même lieu : le tour sera plus fidèle à la réalité.</span>
+            </label>
+            <div class="thumbs" id="extraThumbs"></div>
+            <p class="hint">Pendant le tour, la caméra montre aussi ce qui n’apparaît sur aucune photo : l’IA l’imagine. Plus vous ajoutez de photos du même lieu, plus le résultat est fidèle.</p>
+          </div>
+          <div class="field">
+            <label for="videoTitle">Nom de la vidéo (facultatif)</label>
+            <input type="text" id="videoTitle" maxlength="120" placeholder="Ex. Villa Sainte-Anne — salon">
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" id="genSubmit">Générer la vidéo</button>
+        </form>
+      </div>
+
+      <div class="card" id="genProgress" hidden>
+        <div class="progress">
+          <div class="spinner" aria-hidden="true"></div>
+          <div>
+            <h2 style="margin-bottom:6px;">Génération en cours…</h2>
+            <p class="muted" style="margin:0;" id="genWaitText">En général 1 à 3 minutes. Laissez cette page ouverte.</p>
+            <p class="timer" id="genTimer">0 s</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="genResult" hidden>
+        <p class="eyebrow" id="resultEyebrow">Vidéo prête</p>
+        <h2 id="resultTitle"></h2>
+        <div class="player"><video id="resultVideo" controls playsinline preload="metadata"></video></div>
+        <div class="row-btns">
+          <button class="btn btn-primary" type="button" id="resultDownload">Télécharger (.mp4)</button>
+          <button class="btn btn-ghost" type="button" id="resultAnother">Nouvelle vidéo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet : mes vidéos -->
+    <div data-panel="videos" hidden>
+      <div id="videosMsg" aria-live="polite"></div>
+      <div id="videoList"></div>
+    </div>
+
+    <!-- Onglet : abonnement -->
+    <div data-panel="abonnement" hidden>
+      <div class="card">
+        <h2>Mon abonnement</h2>
+        <div id="accountMsg" aria-live="polite"></div>
+        <div class="kv">
+          <div><span class="k">Formule</span><span class="v">Droly Créateur — 29€/mois</span></div>
+          <div><span class="k">Statut</span><span class="v" id="accStatus"></span></div>
+          <div><span class="k" id="accDateLabel">Prochain renouvellement</span><span class="v" id="accDate"></span></div>
+          <div><span class="k">Compte</span><span class="v" id="accEmail"></span></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="button" id="portalBtn">Gérer mon abonnement</button>
+        <p class="muted small center" style="margin:12px 0 0;">Factures, carte bancaire et résiliation, sur l’espace sécurisé Stripe.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+// ===========================================================================
+// Droly — espace client
+// Connexion : Supabase Auth. Paiement : Stripe (via /api). Génération : /api.
+// ===========================================================================
+
+var $ = function(sel){ return document.querySelector(sel); };
+var params = new URLSearchParams(location.search);
+var LISTING_KEY = 'droly_listing';
+
+function store(key, value){ try { sessionStorage.setItem(key, value); } catch (e) {} }
+function load(key){ try { return sessionStorage.getItem(key); } catch (e) { return null; } }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+if (params.get('listing')) store(LISTING_KEY, params.get('listing'));
+var wantsSignupFirst = params.get('signup') === '1';
+var checkoutResult = params.get('checkout');           // 'success' | 'cancel' | null
+var checkoutSessionId = params.get('session_id');
+var initialTab = params.get('tab');
+var recovering = /type=recovery/.test(location.hash);
+// Lien d'email expiré ou déjà utilisé : Supabase l'indique dans l'adresse.
+var hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+var linkError = hashParams.get('error_code') || params.get('error_code') || hashParams.get('error') || params.get('error');
+var linkErrorText = linkError
+  ? (/expired/.test(linkError + ' ' + (hashParams.get('error_description') || ''))
+      ? 'Ce lien a expiré ou a déjà été utilisé. Demandez-en un nouveau ci-dessous.'
+      : 'Ce lien n’est pas valide. Demandez-en un nouveau ci-dessous.')
+  : null;
+if (linkError) recovering = false;
+
+// Nettoie l'adresse (sans recharger) une fois les paramètres lus.
+function cleanUrl(){ history.replaceState(null, '', location.pathname); }
+
+// ---------------------------------------------------------------------------
+// Vues
+// ---------------------------------------------------------------------------
+var currentView = 'loading';
+function show(view){
+  currentView = view;
+  document.querySelectorAll('[data-view]').forEach(function(el){
+    el.hidden = el.getAttribute('data-view') !== view;
+  });
+  window.scrollTo(0, 0);
+}
+function notice(target, type, text){
+  var el = typeof target === 'string' ? $(target) : target;
+  if (!el) return;
+  el.textContent = '';
+  if (!text) return;
+  var box = document.createElement('div');
+  box.className = 'notice' + (type ? ' ' + type : '');
+  box.textContent = text;
+  el.appendChild(box);
+}
+function fatal(text){
+  $('#errorText').textContent = text;
+  show('error');
+}
+function setBusy(btn, busy, busyLabel){
+  if (!btn) return;
+  if (busy){
+    btn.dataset.label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = busyLabel || 'Patientez…';
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.label) btn.textContent = btn.dataset.label;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Démarrage
+// ---------------------------------------------------------------------------
+var supabase = null;
+var session = null;
+var subscription = null;
+var cfg = null;
+
+async function boot(){
+  try {
+    var res = await fetch('/api/config', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    cfg = await res.json();
+  } catch (e) {
+    return showSetup(null,
+      "Le serveur de l’espace client ne répond pas. Cette page doit être hébergée sur Vercel avec le dossier api/.");
+  }
+  if (!cfg.supabaseUrl || !cfg.supabasePublishableKey || !cfg.ready) return showSetup(cfg);
+
+  var createClient;
+  try {
+    createClient = (await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/+esm')).createClient;
+  } catch (e) {
+    return fatal('Impossible de charger le module de connexion. Vérifiez votre connexion internet, puis rechargez la page.');
+  }
+  supabase = createClient(cfg.supabaseUrl, cfg.supabasePublishableKey);
+
+  supabase.auth.onAuthStateChange(function(event, s){
+    session = s;
+    // Jamais d'appel Supabase directement dans ce rappel : on diffère.
+    if (event === 'PASSWORD_RECOVERY'){ recovering = true; setTimeout(function(){ show('reset'); }, 0); return; }
+    if (event === 'SIGNED_OUT'){ subscription = null; setTimeout(route, 0); return; }
+    if (event === 'SIGNED_IN' && !recovering && (currentView === 'auth' || currentView === 'loading')){
+      setTimeout(route, 0);
+    }
+  });
+
+  var got = await supabase.auth.getSession();
+  session = got.data.session;
+  await route();
+}
+
+function showSetup(cfg, text){
+  $('#setupText').textContent = text ||
+    'Il manque des réglages côté serveur. Si vous êtes client, réessayez un peu plus tard.';
+  var list = $('#setupList');
+  list.textContent = '';
+  if (cfg && cfg.checks){
+    Object.keys(cfg.checks).forEach(function(name){
+      var li = document.createElement('li');
+      li.className = cfg.checks[name] ? 'y' : 'n';
+      li.textContent = (cfg.checks[name] ? '✓ ' : '✗ ') + name;
+      list.appendChild(li);
+    });
+  }
+  var warn = $('#setupWarnings');
+  warn.textContent = '';
+  if (cfg && cfg.warnings){
+    cfg.warnings.forEach(function(w){ var d = document.createElement('div'); notice(d, 'error', w); warn.appendChild(d); });
+  }
+  show('setup');
+}
+
+// Un seul aiguillage à la fois (la connexion peut déclencher plusieurs
+// événements quasi simultanés).
+var routing = null;
+function route(){
+  if (!routing) routing = doRoute().finally(function(){ routing = null; });
+  return routing;
+}
+
+async function doRoute(){
+  try {
+    if (recovering) return show('reset');
+    if (!session) return showAuth(wantsSignupFirst ? 'signup' : 'login');
+
+    $('#userbar').hidden = false;
+    $('#userEmail').textContent = session.user.email || '';
+
+    if (checkoutResult === 'success'){
+      checkoutResult = null;
+      cleanUrl();
+      return activate(checkoutSessionId);
+    }
+    var cancelled = checkoutResult === 'cancel';
+    checkoutResult = null;
+    if (params.toString()) cleanUrl();
+
+    await loadSubscription();
+    if (isActive(subscription)) return openDashboard(initialTab);
+    showSubscribe(cancelled ? 'Paiement annulé : vous n’avez pas été débité.' : null);
+  } catch (e) {
+    fatal(e.message || String(e));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Appels serveur
+// ---------------------------------------------------------------------------
+async function accessToken(){
+  var got = await supabase.auth.getSession();
+  return got.data.session ? got.data.session.access_token : null;
+}
+async function api(path, body){
+  var token = await accessToken();
+  var headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  var res = await fetch(path, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) });
+  var data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok){
+    var message = data && data.message;
+    if (!message){
+      message = res.status === 504
+        ? 'Le serveur a mis trop de temps à répondre. Réessayez.'
+        : res.status === 413
+          ? 'Photo trop lourde. Essayez une autre photo.'
+          : 'Erreur du serveur (' + res.status + '). Réessayez.';
+    }
+    var err = new Error(message);
+    err.status = res.status;
+    err.code = data && data.error;
+    throw err;
+  }
+  return data || {};
+}
+
+// ---------------------------------------------------------------------------
+// Connexion / inscription
+// ---------------------------------------------------------------------------
+var authMode = 'signup';
+
+function translateAuthError(error){
+  var code = error && error.code;
+  var msg = (error && error.message) || '';
+  if (code === 'invalid_credentials' || /Invalid login credentials/i.test(msg)) return 'Email ou mot de passe incorrect.';
+  if (code === 'email_not_confirmed' || /Email not confirmed/i.test(msg)) return 'Confirmez d’abord votre adresse email (cliquez sur le lien reçu par email).';
+  if (code === 'user_already_exists' || /already registered/i.test(msg)) return 'Un compte existe déjà avec cet email. Connectez-vous.';
+  if (code === 'weak_password' || /Password should/i.test(msg)) return 'Mot de passe trop faible : au moins 8 caractères.';
+  if (/rate limit|too many/i.test(msg) || /rate_limit/.test(code || '')) return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
+  if (/invalid format|validate email/i.test(msg) || code === 'email_address_invalid') return 'Adresse email invalide.';
+  return msg || 'Une erreur est survenue. Réessayez.';
+}
+
+function setAuthMode(mode){
+  authMode = mode;
+  var isSignup = mode === 'signup';
+  var isForgot = mode === 'forgot';
+  document.querySelectorAll('#authSeg button').forEach(function(b){
+    b.setAttribute('aria-selected', String(b.getAttribute('data-mode') === (isForgot ? 'login' : mode)));
+  });
+  $('#authSeg').hidden = isForgot;
+  $('#authTitle').textContent = isSignup ? 'Créez votre compte' : (isForgot ? 'Mot de passe oublié' : 'Connexion');
+  $('#authLead').textContent = isSignup
+    ? (load(LISTING_KEY) ? 'Créez votre compte pour générer la vidéo de votre annonce.'
+      : 'Pour générer vos vidéos, les retrouver et gérer votre abonnement.')
+    : (isForgot ? 'Indiquez votre email : vous recevrez un lien pour choisir un nouveau mot de passe.'
+      : 'Retrouvez vos vidéos et votre abonnement.');
+  $('#passwordField').hidden = isForgot;
+  $('#authPassword').setAttribute('autocomplete', isSignup ? 'new-password' : 'current-password');
+  $('#passwordHint').hidden = !isSignup;
+  $('#authSubmit').textContent = isSignup ? 'Créer mon compte' : (isForgot ? 'Recevoir un lien par email' : 'Se connecter');
+  $('#forgotBtn').hidden = mode !== 'login';
+  $('#backToLoginBtn').hidden = !isForgot;
+  notice('#authMsg', null, '');
+}
+
+function showAuth(mode){
+  $('#userbar').hidden = true;
+  if (linkErrorText){
+    setAuthMode('forgot');
+    notice('#authMsg', 'error', linkErrorText);
+    linkErrorText = null;
+    cleanUrl();
+  } else {
+    setAuthMode(mode || 'signup');
+  }
+  show('auth');
+}
+
+document.querySelectorAll('#authSeg button').forEach(function(b){
+  b.addEventListener('click', function(){ setAuthMode(b.getAttribute('data-mode')); });
+});
+$('#forgotBtn').addEventListener('click', function(){ setAuthMode('forgot'); });
+$('#backToLoginBtn').addEventListener('click', function(){ setAuthMode('login'); });
+
+$('#authForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var email = $('#authEmail').value.trim();
+  var password = $('#authPassword').value;
+  var btn = $('#authSubmit');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return notice('#authMsg', 'error', 'Adresse email invalide.');
+  if (authMode !== 'forgot' && password.length < 8) return notice('#authMsg', 'error', 'Le mot de passe doit contenir au moins 8 caractères.');
+
+  setBusy(btn, true);
+  notice('#authMsg', null, '');
+  try {
+    var redirect = location.origin + location.pathname;
+    if (authMode === 'signup'){
+      var r = await supabase.auth.signUp({ email: email, password: password, options: { emailRedirectTo: redirect } });
+      if (r.error) throw r.error;
+      if (r.data.user && Array.isArray(r.data.user.identities) && r.data.user.identities.length === 0){
+        setAuthMode('login');
+        notice('#authMsg', 'error', 'Un compte existe déjà avec cet email. Connectez-vous.');
+      } else if (!r.data.session){
+        notice('#authMsg', 'success', 'Presque fini ! Un email de confirmation a été envoyé à ' + email +
+          '. Cliquez sur le lien qu’il contient pour activer votre compte (pensez à regarder dans les indésirables).');
+      }
+      // Sinon : connecté directement, la suite est gérée par onAuthStateChange.
+    } else if (authMode === 'login'){
+      var r2 = await supabase.auth.signInWithPassword({ email: email, password: password });
+      if (r2.error) throw r2.error;
+    } else {
+      var r3 = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirect });
+      if (r3.error) throw r3.error;
+      notice('#authMsg', 'success', 'Si un compte existe pour ' + email + ', un lien pour choisir un nouveau mot de passe vient d’être envoyé.');
+    }
+  } catch (err) {
+    notice('#authMsg', 'error', translateAuthError(err));
+  } finally {
+    setBusy(btn, false);
+  }
+});
+
+$('#resetForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  var password = $('#newPassword').value;
+  if (password.length < 8) return notice('#resetMsg', 'error', 'Le mot de passe doit contenir au moins 8 caractères.');
+  var btn = $('#resetSubmit');
+  setBusy(btn, true);
+  try {
+    var r = await supabase.auth.updateUser({ password: password });
+    if (r.error) throw r.error;
+    recovering = false;
+    cleanUrl();
+    var got = await supabase.auth.getSession();
+    session = got.data.session;
+    await route();
+  } catch (err) {
+    notice('#resetMsg', 'error', translateAuthError(err));
+  } finally {
+    setBusy(btn, false);
+  }
+});
+
+$('#logoutBtn').addEventListener('click', async function(){
+  if (generating && !confirm('Une vidéo est en cours de génération. Se déconnecter quand même ?')) return;
+  await supabase.auth.signOut();
+});
+
+// ---------------------------------------------------------------------------
+// Abonnement
+// ---------------------------------------------------------------------------
+// Actif = statut OK ET même mode Stripe que le site (un abonnement de test ne
+// compte plus une fois les vrais paiements activés), comme côté serveur.
+function isActive(sub){
+  return !!sub && (sub.status === 'active' || sub.status === 'trialing') &&
+    sub.livemode === (cfg && cfg.stripeMode === 'live');
+}
+
+async function loadSubscription(){
+  var r = await supabase.from('subscriptions').select('*').maybeSingle();
+  if (r.error) throw new Error('Impossible de lire votre abonnement : ' + r.error.message);
+  subscription = r.data;
+  return subscription;
+}
+
+function showSubscribe(message){
+  var status = subscription && subscription.status;
+  var paymentIssue = status === 'past_due' || status === 'unpaid' || status === 'incomplete';
+  $('#subTitle').textContent = paymentIssue ? 'Un paiement n’est pas passé'
+    : (status === 'canceled' ? 'Votre abonnement est terminé' : 'Activez votre abonnement');
+  $('#subLead').textContent = paymentIssue
+    ? 'Mettez à jour votre moyen de paiement pour retrouver l’accès à vos vidéos.'
+    : (status === 'canceled' ? 'Réabonnez-vous pour générer de nouvelles vidéos.'
+      : 'Générez les vidéos de vos annonces, sans filigrane, prêtes à livrer à vos clients.');
+  $('#fixPaymentBtn').hidden = !(paymentIssue && subscription.stripe_customer_id);
+  $('#subscribeBtn').hidden = paymentIssue && !!subscription.stripe_customer_id;
+  notice('#subMsg', message && /annulé/.test(message) ? null : 'error', message || '');
+  show('subscribe');
+}
+
+$('#subscribeBtn').addEventListener('click', async function(){
+  var btn = this;
+  setBusy(btn, true, 'Redirection vers le paiement…');
+  try {
+    var data = await api('/api/create-checkout');
+    location.href = data.url;
+  } catch (err) {
+    if (err.code === 'already_subscribed' || err.code === 'payment_issue'){
+      await loadSubscription();
+      if (isActive(subscription)) return openDashboard();
+      setBusy(btn, false);
+      return showSubscribe(err.message);
+    }
+    notice('#subMsg', 'error', err.message);
+    setBusy(btn, false);
+  }
+});
+
+async function openPortal(btn, msgTarget){
+  setBusy(btn, true, 'Ouverture…');
+  try {
+    var data = await api('/api/billing-portal');
+    location.href = data.url;
+  } catch (err) {
+    notice(msgTarget, 'error', err.message);
+    setBusy(btn, false);
+  }
+}
+$('#fixPaymentBtn').addEventListener('click', function(){ openPortal(this, '#subMsg'); });
+$('#portalBtn').addEventListener('click', function(){ openPortal(this, '#accountMsg'); });
+
+async function activate(sessionId){
+  show('activating');
+  if (sessionId){
+    try { await api('/api/sync-checkout', { sessionId: sessionId }); } catch (e) { /* le webhook prendra le relais */ }
+  }
+  for (var i = 0; i < 15; i++){
+    await loadSubscription();
+    if (isActive(subscription)) return openDashboard('generer', 'Abonnement activé. Bienvenue !');
+    await sleep(2000);
+  }
+  showSubscribe('Votre paiement est bien reçu, mais l’activation prend plus de temps que prévu. Rechargez la page dans une minute.');
+}
+
+// ---------------------------------------------------------------------------
+// Tableau de bord
+// ---------------------------------------------------------------------------
+var videosLoaded = false;
+
+function openDashboard(tab, message){
+  show('dashboard');
+  notice('#dashMsg', message ? 'success' : null, message || '');
+  renderAccount();
+  renderListingHint();
+  selectTab(tab === 'videos' || tab === 'abonnement' ? tab : 'generer');
+  loadVideos().catch(function(){});
+  refreshQuota().catch(function(){});
+  resumePending().catch(function(){});
+}
+
+function selectTab(name){
+  document.querySelectorAll('#dashTabs button').forEach(function(b){
+    b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === name));
+  });
+  document.querySelectorAll('[data-panel]').forEach(function(p){
+    p.hidden = p.getAttribute('data-panel') !== name;
+  });
+  if (name === 'abonnement') refreshAccount();
+}
+document.querySelectorAll('#dashTabs button').forEach(function(b){
+  b.addEventListener('click', function(){ selectTab(b.getAttribute('data-tab')); });
+});
+
+function formatDate(iso){
+  if (!iso) return '—';
+  var d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function renderAccount(){
+  var s = subscription || {};
+  var labels = { active: ['Actif', 'ok'], trialing: ['Période d’essai', 'ok'], past_due: ['Paiement en retard', 'warn'],
+    unpaid: ['Impayé', 'warn'], incomplete: ['Paiement incomplet', 'warn'], canceled: ['Terminé', 'off'] };
+  var l = labels[s.status] || [s.status || '—', 'off'];
+  var badge = document.createElement('span');
+  badge.className = 'badge ' + l[1];
+  badge.textContent = s.cancel_at_period_end && isActive(s) ? 'Actif jusqu’à la fin de période' : l[0];
+  $('#accStatus').textContent = '';
+  $('#accStatus').appendChild(badge);
+  $('#accDateLabel').textContent = s.cancel_at_period_end ? 'Accès jusqu’au' : 'Prochain renouvellement';
+  $('#accDate').textContent = formatDate(s.current_period_end);
+  $('#accEmail').textContent = (session && session.user.email) || '';
+  notice('#accountMsg', null, s.cancel_at_period_end
+    ? 'Votre abonnement est résilié : il ne sera pas renouvelé. Vous gardez l’accès jusqu’à la date indiquée.' : '');
+}
+
+async function refreshAccount(){
+  try { await loadSubscription(); renderAccount(); } catch (e) {}
+}
+
+// Lien de l'annonce saisi sur la page d'accueil (uniquement http/https).
+function renderListingHint(){
+  var box = $('#listingHint');
+  box.textContent = '';
+  var raw = load(LISTING_KEY);
+  if (!raw) return;
+  var url;
+  try { url = new URL(raw); } catch (e) { return; }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return;
+  var n = document.createElement('div');
+  n.className = 'notice';
+  n.appendChild(document.createTextNode('Votre annonce : '));
+  var a = document.createElement('a');
+  a.href = url.href; a.target = '_blank'; a.rel = 'noopener noreferrer';
+  a.textContent = url.hostname + (url.pathname.length > 1 ? url.pathname.slice(0, 28) + (url.pathname.length > 28 ? '…' : '') : '');
+  n.appendChild(a);
+  n.appendChild(document.createTextNode('. Ouvrez-la, enregistrez une photo (appui long sur la photo → « Enregistrer l’image »), puis ajoutez-la ci-dessous.'));
+  box.appendChild(n);
+}
+
+// ---------------------------------------------------------------------------
+// Nouvelle vidéo
+// ---------------------------------------------------------------------------
+var preparedImage = null;   // data:image/jpeg;base64,... prêt à envoyer
+var extraImages = [];       // photos supplémentaires préparées (tours à 360°)
+var MAX_EXTRA = 3;
+// Poids maximum de chaque photo envoyée : l'ensemble reste sous la limite
+// d'envoi du serveur (4,5 Mo), même avec 3 photos supplémentaires.
+var MAIN_MAX_LENGTH = 2000000;
+var EXTRA_MAX_LENGTH = 700000;
+var generating = false;
+var lastVideo = null;
+var timerHandle = null;
+
+// Réduit la photo (poids et dimensions) avant l'envoi : plus rapide, et
+// toujours sous les limites du serveur et du générateur vidéo.
+function prepareImage(file, maxLength){
+  maxLength = maxLength || MAIN_MAX_LENGTH;
+  return new Promise(function(resolve, reject){
+    if (!file.type || file.type.indexOf('image/') !== 0) return reject(new Error('Ce fichier n’est pas une photo.'));
+    var objectUrl = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+        if (!sw || !sh) throw new Error('Photo illisible.');
+        var ratio = sw / sh;
+        if (ratio > 2){ var nw = sh * 2; sx = (sw - nw) / 2; sw = nw; }
+        else if (ratio < 0.5){ var nh = sw * 2; sy = (sh - nh) / 2; sh = nh; }
+        var attempts = [[1920, 0.86], [1600, 0.8], [1280, 0.72], [1024, 0.7], [800, 0.65]];
+        for (var i = 0; i < attempts.length; i++){
+          var scale = Math.min(1, attempts[i][0] / Math.max(sw, sh));
+          var w = Math.max(1, Math.round(sw * scale)), h = Math.max(1, Math.round(sh * scale));
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+          var data = canvas.toDataURL('image/jpeg', attempts[i][1]);
+          if (data.indexOf('data:image/jpeg') === 0 && data.length <= maxLength) return resolve(data);
+        }
+        reject(new Error('Photo trop lourde, même après compression.'));
+      } catch (e) { reject(e); }
+      finally { URL.revokeObjectURL(objectUrl); }
+    };
+    img.onerror = function(){
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Impossible de lire cette photo. Utilisez une photo JPEG ou PNG.'));
+    };
+    img.src = objectUrl;
+  });
+}
+
+function resetDrop(){
+  preparedImage = null;
+  $('#photoInput').value = '';
+  var drop = $('#drop');
+  drop.classList.remove('has-photo');
+  var old = drop.querySelector('img');
+  if (old) old.remove();
+  drop.querySelector('.ico').hidden = false;
+  $('#dropTitle').textContent = 'Choisir une photo';
+  $('#dropSub').textContent = 'Depuis votre téléphone ou votre ordinateur (JPEG, PNG, WebP)';
+}
+
+$('#photoInput').addEventListener('change', async function(){
+  var file = this.files && this.files[0];
+  notice('#genMsg', null, '');
+  if (!file) return resetDrop();
+  $('#dropTitle').textContent = 'Préparation de la photo…';
+  try {
+    preparedImage = await prepareImage(file);
+    var drop = $('#drop');
+    var old = drop.querySelector('img');
+    if (old) old.remove();
+    var img = document.createElement('img');
+    img.src = preparedImage;
+    img.alt = 'Photo choisie';
+    drop.insertBefore(img, $('#dropTitle'));
+    drop.classList.add('has-photo');
+    drop.querySelector('.ico').hidden = true;
+    $('#dropTitle').textContent = 'Photo prête';
+    $('#dropSub').textContent = 'Touchez pour changer de photo';
+  } catch (err) {
+    resetDrop();
+    notice('#genMsg', 'error', err.message);
+  }
+});
+
+// Type de vidéo : plan drone (travelling), ou tour à 360° (extérieur / intérieur).
+var PHOTO_HINTS = {
+  travelling: 'Une pièce bien éclairée, ou la maison vue de l’extérieur, au format paysage.',
+  exterior: 'La façade de la maison, prise d’un peu loin : c’est le point de départ et d’arrivée du tour.',
+  interior: 'La pièce vue depuis un angle : c’est le point de départ et d’arrivée du tour.'
+};
+function currentKind(){
+  var el = document.querySelector('input[name="videoKind"]:checked');
+  var kind = el && el.value === 'tour' ? 'tour' : 'travelling';
+  var v = document.querySelector('input[name="tourVariant"]:checked');
+  return { kind: kind, variant: v && v.value === 'interior' ? 'interior' : 'exterior' };
+}
+function applyKind(){
+  var k = currentKind();
+  document.querySelectorAll('#kindPicker .kind, #variantPicker .pill').forEach(function(l){ l.classList.toggle('on', l.querySelector('input').checked); });
+  $('#variantPicker').hidden = k.kind !== 'tour';
+  $('#extraField').hidden = k.kind !== 'tour';
+  $('#photoHint').textContent = PHOTO_HINTS[k.kind === 'tour' ? k.variant : 'travelling'];
+  $('#genSubmit').textContent = k.kind === 'tour' ? 'Générer le tour à 360°' : 'Générer la vidéo';
+}
+document.querySelectorAll('input[name="videoKind"], input[name="tourVariant"]').forEach(function(r){ r.addEventListener('change', applyKind); });
+
+function renderExtras(){
+  var box = $('#extraThumbs');
+  box.textContent = '';
+  extraImages.forEach(function(data, i){
+    var t = document.createElement('div'); t.className = 'thumb';
+    var img = document.createElement('img'); img.src = data; img.alt = 'Photo supplémentaire ' + (i + 1);
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = '×';
+    b.setAttribute('aria-label', 'Retirer la photo supplémentaire ' + (i + 1));
+    b.addEventListener('click', function(){ extraImages.splice(i, 1); renderExtras(); });
+    t.appendChild(img); t.appendChild(b); box.appendChild(t);
+  });
+  $('#extraTitle').textContent = extraImages.length >= MAX_EXTRA ? '3 photos ajoutées (maximum)'
+    : (extraImages.length ? 'Ajouter une autre photo' : 'Ajouter des photos');
+}
+
+$('#extraInput').addEventListener('change', async function(){
+  var files = Array.prototype.slice.call(this.files || []);
+  this.value = '';
+  notice('#genMsg', null, '');
+  if (!files.length) return;
+  var room = MAX_EXTRA - extraImages.length;
+  if (files.length > room){
+    notice('#genMsg', 'error', room > 0
+      ? 'Vous pouvez encore ajouter ' + plural(room, 'photo', 'photos') + ' : les autres ont été ignorées.'
+      : '3 photos supplémentaires au maximum. Retirez-en une pour en ajouter une autre.');
+  }
+  $('#extraTitle').textContent = 'Préparation…';
+  for (var i = 0; i < files.length && extraImages.length < MAX_EXTRA; i++){
+    try { extraImages.push(await prepareImage(files[i], EXTRA_MAX_LENGTH)); }
+    catch (err) { notice('#genMsg', 'error', err.message); }
+  }
+  renderExtras();
+});
+
+var drop = $('#drop');
+['dragenter', 'dragover'].forEach(function(t){ drop.addEventListener(t, function(){ drop.classList.add('over'); }); });
+['dragleave', 'drop'].forEach(function(t){ drop.addEventListener(t, function(){ drop.classList.remove('over'); }); });
+
+function startTimer(startedAt){
+  var start = startedAt || Date.now();
+  $('#genTimer').textContent = '0 s';
+  timerHandle = setInterval(function(){
+    $('#genTimer').textContent = Math.round((Date.now() - start) / 1000) + ' s';
+  }, 1000);
+}
+function stopTimer(){ clearInterval(timerHandle); timerHandle = null; }
+
+window.addEventListener('beforeunload', function(e){
+  if (generating){ e.preventDefault(); e.returnValue = ''; }
+});
+
+function showProgress(startedAt, kind){
+  $('#genWaitText').textContent = kind === 'tour'
+    ? 'Un tour à 360° prend en général 2 à 5 minutes. Laissez cette page ouverte.'
+    : 'En général 1 à 3 minutes. Laissez cette page ouverte.';
+  $('#genFormCard').hidden = true;
+  $('#genResult').hidden = true;
+  $('#genProgress').hidden = false;
+  startTimer(startedAt);
+}
+function hideProgress(){
+  stopTimer();
+  $('#genProgress').hidden = true;
+  $('#genFormCard').hidden = false;
+}
+
+// Suit une génération jusqu'au bout (une vérification toutes les 5 s).
+async function waitForGeneration(generationId){
+  var deadline = Date.now() + 10 * 60 * 1000;
+  while (Date.now() < deadline){
+    await sleep(5000);
+    var r;
+    try {
+      r = await api('/api/generation-status', { generationId: generationId });
+    } catch (err) {
+      if (err.status === 401 || err.status === 404) throw err;
+      continue; // coupure réseau passagère : on réessaie
+    }
+    if (r.video) return r.video;
+    if (r.gone) return null; // vidéo supprimée entre-temps
+    if (r.failed) throw new Error(r.message);
+  }
+  var e = new Error('La vidéo prend plus de temps que prévu. Elle apparaîtra automatiquement dans « Mes vidéos » dès qu’elle sera prête.');
+  e.code = 'still_pending';
+  throw e;
+}
+
+async function finishWithVideo(video){
+  lastVideo = video;
+  stopTimer();
+  $('#genProgress').hidden = true;
+  await showResult(video);
+}
+
+$('#genForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  if (generating) return;
+  var link = $('#photoUrl').value.trim();
+  var image = preparedImage || link;
+  if (!image) return notice('#genMsg', 'error', 'Ajoutez une photo, ou collez le lien direct d’une photo.');
+  if (!preparedImage){
+    var u;
+    try { u = new URL(link); } catch (err) { return notice('#genMsg', 'error', 'Ce lien n’est pas valide.'); }
+    if (u.protocol !== 'https:') return notice('#genMsg', 'error', 'Le lien doit commencer par https://');
+  }
+
+  var k = currentKind();
+  var payload = { image: image, title: $('#videoTitle').value.trim(), kind: k.kind };
+  if (k.kind === 'tour'){
+    payload.variant = k.variant;
+    if (extraImages.length) payload.extraImages = extraImages.slice();
+  }
+
+  generating = true;
+  notice('#genMsg', null, '');
+  notice('#dashMsg', null, '');
+  showProgress(null, k.kind);
+  try {
+    var data = await api('/api/generate', payload);
+    var video = data.video || (data.pending && data.generationId ? await waitForGeneration(data.generationId) : null);
+    if (!video) throw new Error('Réponse inattendue du serveur. Regardez dans « Mes vidéos » dans un instant.');
+    $('#genForm').reset();
+    // garde le type (et le sens du tour) choisi pour la vidéo suivante
+    var keepKind = document.querySelector('input[name="videoKind"][value="' + k.kind + '"]');
+    if (keepKind) keepKind.checked = true;
+    var keepVariant = document.querySelector('input[name="tourVariant"][value="' + k.variant + '"]');
+    if (keepVariant) keepVariant.checked = true;
+    resetDrop();
+    extraImages = [];
+    renderExtras();
+    applyKind();
+    await finishWithVideo(video);
+  } catch (err) {
+    hideProgress();
+    if (err.code === 'subscription_required'){
+      await loadSubscription().catch(function(){});
+      generating = false;
+      return showSubscribe(err.message);
+    }
+    notice('#genMsg', err.code === 'still_pending' ? null : 'error', err.message);
+  } finally {
+    generating = false;
+    stopTimer();
+    $('#genProgress').hidden = true;
+    loadVideos().catch(function(){});
+    refreshQuota().catch(function(){});
+  }
+});
+
+// Reprend les générations laissées en cours (page fermée, réseau coupé…).
+var resuming = false;
+async function resumePending(){
+  if (generating || resuming) return;
+  var since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  var r = await supabase.from('generations').select('id,title,status,created_at,kind')
+    .in('status', ['reserved', 'pending', 'finalizing']).gte('created_at', since)
+    .order('created_at', { ascending: true });
+  if (r.error || !r.data || !r.data.length) return;
+  resuming = true;
+  generating = true;
+  var latest = r.data[r.data.length - 1];
+  notice('#genMsg', null, '');
+  showProgress(Date.parse(latest.created_at), latest.kind);
+  var done = null;
+  try {
+    for (var i = 0; i < r.data.length; i++){
+      try {
+        done = (await waitForGeneration(r.data[i].id)) || done;
+      } catch (err) {
+        if (r.data[i] === latest) notice('#genMsg', err.code === 'still_pending' ? null : 'error', err.message);
+      }
+    }
+    if (done) await finishWithVideo(done); else hideProgress();
+  } finally {
+    generating = false;
+    resuming = false;
+    stopTimer();
+    $('#genProgress').hidden = true;
+    loadVideos().catch(function(){});
+    refreshQuota().catch(function(){});
+  }
+}
+
+function plural(n, one, many){ return n + ' ' + (n > 1 ? many : one); }
+
+// Affiche les vidéos restantes (mêmes règles que le serveur).
+async function refreshQuota(){
+  var el = $('#quotaLine');
+  var lim = cfg && cfg.limits;
+  if (!lim || (!lim.perDay && !lim.perMonth && !lim.toursPerMonth)){ el.hidden = true; return; }
+  var since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  var r = await supabase.from('generations').select('status,created_at,kind')
+    .gte('created_at', since30).neq('status', 'failed');
+  if (r.error){ el.hidden = true; return; }
+  var rows = r.data || [];
+  var dayStart = Date.now() - 24 * 60 * 60 * 1000;
+  var today = rows.filter(function(g){ return Date.parse(g.created_at) > dayStart; }).length;
+  var tours = rows.filter(function(g){ return g.kind === 'tour'; }).length;
+  var parts = [];
+  if (lim.perMonth){
+    var left = Math.max(0, lim.perMonth - rows.length);
+    var line = 'Il vous reste ' + plural(left, 'vidéo', 'vidéos') + ' sur 30 jours';
+    if (lim.toursPerMonth) line += ' (dont ' + plural(Math.min(left, Math.max(0, lim.toursPerMonth - tours)), 'tour', 'tours') + ' à 360°)';
+    parts.push(line);
+  } else if (lim.toursPerMonth){
+    parts.push('Il vous reste ' + plural(Math.max(0, lim.toursPerMonth - tours), 'tour', 'tours') + ' à 360° sur 30 jours');
+  }
+  if (lim.perDay) parts.push(plural(Math.max(0, lim.perDay - today), 'vidéo', 'vidéos') + ' sur les dernières 24 h');
+  el.textContent = parts.join(' · ') + '.';
+  el.hidden = false;
+}
+
+async function signedUrl(path, seconds, downloadName){
+  var opts = downloadName ? { download: downloadName } : undefined;
+  var r = await supabase.storage.from('videos').createSignedUrl(path, seconds, opts);
+  if (r.error) throw new Error('Vidéo introuvable : ' + r.error.message);
+  return r.data.signedUrl;
+}
+
+async function showResult(video){
+  $('#resultEyebrow').textContent = video.kind === 'tour' ? 'Tour à 360° prêt' : 'Vidéo prête';
+  $('#resultTitle').textContent = video.title;
+  $('#resultVideo').src = await signedUrl(video.storage_path, 3600);
+  $('#genFormCard').hidden = true;
+  $('#genResult').hidden = false;
+}
+
+function fileName(title){
+  var base = String(title || 'video').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  return 'droly-' + (base || 'video') + '.mp4';
+}
+
+async function download(video, btn){
+  setBusy(btn, true, 'Préparation…');
+  try {
+    location.assign(await signedUrl(video.storage_path, 120, fileName(video.title)));
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    setTimeout(function(){ setBusy(btn, false); }, 1500);
+  }
+}
+
+$('#resultDownload').addEventListener('click', function(){ if (lastVideo) download(lastVideo, this); });
+$('#resultAnother').addEventListener('click', function(){
+  $('#genResult').hidden = true;
+  $('#resultVideo').removeAttribute('src');
+  $('#genFormCard').hidden = false;
+});
+
+// ---------------------------------------------------------------------------
+// Mes vidéos
+// ---------------------------------------------------------------------------
+async function loadVideos(){
+  var list = $('#videoList');
+  if (!videosLoaded){
+    list.textContent = '';
+    var l = document.createElement('div');
+    l.className = 'loading-block';
+    l.innerHTML = '<div class="spinner" aria-hidden="true"></div>';
+    list.appendChild(l);
+  }
+  var r = await supabase.from('videos').select('id,title,storage_path,created_at,kind').order('created_at', { ascending: false });
+  if (r.error){
+    list.textContent = '';
+    return notice('#videosMsg', 'error', 'Impossible de charger vos vidéos : ' + r.error.message);
+  }
+  notice('#videosMsg', null, '');
+  videosLoaded = true;
+  var videos = r.data || [];
+  $('#videoCount').textContent = String(videos.length);
+  list.textContent = '';
+
+  if (!videos.length){
+    var empty = document.createElement('div');
+    empty.className = 'empty';
+    var p = document.createElement('p');
+    p.textContent = 'Aucune vidéo pour l’instant.';
+    var b = document.createElement('button');
+    b.className = 'btn btn-primary'; b.type = 'button'; b.textContent = 'Créer ma première vidéo';
+    b.addEventListener('click', function(){ selectTab('generer'); });
+    empty.appendChild(p); empty.appendChild(b);
+    return list.appendChild(empty);
+  }
+
+  var urls = {};
+  var signed = await supabase.storage.from('videos').createSignedUrls(videos.map(function(v){ return v.storage_path; }), 3600);
+  (signed.data || []).forEach(function(s){ if (s && s.signedUrl && s.path) urls[s.path] = s.signedUrl; });
+
+  var grid = document.createElement('div');
+  grid.className = 'video-grid';
+  videos.forEach(function(v){ grid.appendChild(videoCard(v, urls[v.storage_path])); });
+  list.appendChild(grid);
+}
+
+function videoCard(video, url){
+  var card = document.createElement('article');
+  card.className = 'vcard';
+
+  var player = document.createElement('div');
+  player.className = 'player';
+  var vid = document.createElement('video');
+  vid.controls = true; vid.playsInline = true; vid.preload = 'metadata';
+  vid.setAttribute('playsinline', '');
+  if (url) vid.src = url;
+  player.appendChild(vid);
+
+  var meta = document.createElement('div');
+  meta.className = 'meta';
+  var head = document.createElement('div');
+  var t = document.createElement('div'); t.className = 't'; t.textContent = video.title || 'Vidéo';
+  var d = document.createElement('div'); d.className = 'd'; d.textContent = formatDate(video.created_at);
+  if (video.kind === 'tour'){
+    var tag = document.createElement('span');
+    tag.className = 'badge'; tag.style.marginLeft = '8px'; tag.textContent = 'Tour 360°';
+    d.appendChild(tag);
+  }
+  head.appendChild(t); head.appendChild(d);
+
+  var actions = document.createElement('div');
+  actions.className = 'actions';
+  var dl = document.createElement('button');
+  dl.className = 'btn btn-primary'; dl.type = 'button'; dl.textContent = 'Télécharger';
+  dl.addEventListener('click', function(){ download(video, dl); });
+  var del = document.createElement('button');
+  del.className = 'btn btn-ghost'; del.type = 'button'; del.textContent = 'Supprimer';
+  del.setAttribute('aria-label', 'Supprimer « ' + (video.title || 'la vidéo') + ' »');
+  del.addEventListener('click', function(){ removeVideo(video, del); });
+  actions.appendChild(dl); actions.appendChild(del);
+
+  meta.appendChild(head); meta.appendChild(actions);
+  card.appendChild(player); card.appendChild(meta);
+  return card;
+}
+
+async function removeVideo(video, btn){
+  if (!confirm('Supprimer définitivement « ' + (video.title || 'cette vidéo') + ' » ?\n(Elle reste comptée dans votre quota de vidéos.)')) return;
+  setBusy(btn, true, '…');
+  try {
+    var s = await supabase.storage.from('videos').remove([video.storage_path]);
+    if (s.error) throw s.error;
+    var r = await supabase.from('videos').delete().eq('id', video.id);
+    if (r.error) throw r.error;
+    if (lastVideo && lastVideo.id === video.id){ lastVideo = null; $('#genResult').hidden = true; $('#genFormCard').hidden = false; }
+    await loadVideos();
+  } catch (err) {
+    notice('#videosMsg', 'error', 'Suppression impossible : ' + (err.message || err));
+    setBusy(btn, false);
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

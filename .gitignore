@@ -1,0 +1,22 @@
+# Dépendances Node.js
+node_modules/
+api/node_modules/
+
+# Secrets — ne jamais commit une vraie clé API
+.env
+api/.env
+
+# Supabase CLI (si jamais utilisée en local — pas nécessaire pour la
+# méthode "dashboard" décrite dans supabase/README.md)
+supabase/.branches/
+supabase/.temp/
+
+# Fichiers système / éditeurs
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Éditeurs
+.vscode/
+.idea/
