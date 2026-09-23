@@ -229,6 +229,7 @@ Facultatif :
 |---|---|
 | `MAX_VIDEOS_PER_MONTH` | vidéos maximum par client sur 30 jours glissants (défaut : **30**, `0` = sans limite) |
 | `MAX_TOURS_PER_MONTH` | tours à 360° maximum par client sur 30 jours (défaut : **5**, `0` = sans limite). Ils comptent aussi dans la limite ci-dessus. |
+| `FREE_TRIALS_PER_DAY` | vidéos gratuites offertes chaque jour sur la page d'accueil (défaut : **20**, soit environ 2 $ par jour au maximum ; `0` ferme l'essai) |
 | `MAX_VIDEOS_PER_DAY` | vidéos maximum par client sur 24 h (défaut : **10**, `0` = sans limite) |
 | `SEEDANCE_MODEL` | modèle des vidéos « Plan drone » (défaut : `seedance-1-0-pro-fast-251015`). Voir étape 3bis. |
 | `SEEDANCE_TOUR_MODEL` | modèle des tours à 360° (défaut : `dreamina-seedance-2-0-mini-260615`). Voir étape 3bis. |
@@ -247,6 +248,11 @@ Ouvre **`https://drolynet.vercel.app/api/config`** dans ton navigateur. Tu dois 
 - `"warnings": []` (sinon, chaque avertissement explique quoi corriger)
 
 Cette page n'affiche jamais tes clés secrètes, seulement si elles sont présentes, ainsi que les limites de vidéos en vigueur.
+
+**L'essai gratuit de la page d'accueil.** Un visiteur peut recevoir **une vraie vidéo, offerte**, sans compte ni carte :
+il laisse son email, ajoute une photo, et repart avec le fichier. Trois garde-fous, tous appliqués par la base de données :
+une seule vidéo par adresse email, une seule par connexion toutes les 24 h, et un plafond pour tout le site
+(`FREE_TRIALS_PER_DAY`, 20 par défaut ≈ 2 $ par jour). Les essais ratés ne comptent pas. Pour fermer l'essai : mets `0`.
 
 **Pourquoi des limites ?** Chaque vidéo te coûte des crédits Seedance (environ 0,10 $ un plan drone, 0,75 $ un tour à 360°).
 Avec les réglages par défaut, un client peut générer au maximum 30 vidéos sur 30 jours, dont 5 tours : environ **6 $** de
@@ -268,6 +274,8 @@ serait contournable). Le client voit dans son espace combien de vidéos il lui r
 6. **Mes vidéos** : la vidéo est là, téléchargeable. Si la génération dure plus de 30 secondes, la page continue
    de la suivre toute seule ; même si tu fermes la page, la vidéo sera récupérée à ton prochain passage.
 7. **Abonnement → Gérer mon abonnement** → résilie → reviens : « Actif jusqu'à la fin de période ».
+8. Reviens sur l'accueil, colle un lien d'annonce, laisse un **autre** email et une photo : tu reçois la vidéo gratuite,
+   et un deuxième essai avec le même email doit être refusé poliment.
 
 Côté coulisses, dans Supabase → **Table Editor** : la table `subscriptions` contient ta ligne (`status = active`),
 la table `videos` ta vidéo. Dans Stripe → **Webhooks** → ton webhook → **Event deliveries** : les envois sont en `200`.

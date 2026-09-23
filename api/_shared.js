@@ -78,7 +78,41 @@ export function limits() {
     perDay: intEnv('MAX_VIDEOS_PER_DAY', 10),
     perMonth: intEnv('MAX_VIDEOS_PER_MONTH', 30),
     toursPerMonth: intEnv('MAX_TOURS_PER_MONTH', 5),
+    freeTrialsPerDay: intEnv('FREE_TRIALS_PER_DAY', 20),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Photos envoyées par les visiteurs
+// ---------------------------------------------------------------------------
+
+const DATA_URI = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const MAX_DATA_URI_LENGTH = 5 * 1024 * 1024; // la page compresse les photos avant l'envoi
+
+export function checkImage(image) {
+  if (typeof image !== 'string' || !image) return 'Ajoutez une photo ou un lien vers une photo.';
+  if (image.startsWith('data:')) {
+    if (image.length > MAX_DATA_URI_LENGTH) return 'Photo trop lourde (5 Mo maximum).';
+    if (!DATA_URI.test(image)) return 'Format de photo non pris en charge (JPEG, PNG ou WebP).';
+    return null;
+  }
+  let url;
+  try { url = new URL(image); } catch { return "Le lien de la photo n'est pas valide."; }
+  if (url.protocol !== 'https:') return 'Le lien de la photo doit commencer par https://';
+  if (image.length > 2048) return 'Le lien de la photo est trop long.';
+  return null;
+}
+
+// Empreinte de la connexion du visiteur : sert à limiter les essais gratuits
+// sans jamais conserver l'adresse IP elle-même (calcul à sens unique, salé avec
+// une clé secrète : impossible de retrouver l'adresse à partir de l'empreinte).
+export async function ipFingerprint(request) {
+  const forwarded = (request.headers.get('x-forwarded-for') || '').split(',')[0].trim();
+  const raw = forwarded || (request.headers.get('x-real-ip') || '').trim();
+  if (!raw) return null;
+  const bytes = new TextEncoder().encode(env('SUPABASE_SECRET_KEY') + '|ip|' + raw);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 40);
 }
 
 // Paiements réels (clé sk_live_ / rk_live_) ou mode test ?

@@ -169,6 +169,77 @@ grant execute on function public.reserve_generation(uuid, text, int, int, text, 
 grant execute on function public.claim_generation(uuid) to service_role;
 
 
+-- 3bis) Essais gratuits de la page d'accueil : une vraie vidéo offerte, une seule
+--       fois par personne. Le client n'a aucun accès à cette table ; seules les
+--       fonctions du serveur (clé secrète) y écrivent.
+create table if not exists public.free_trials (
+  id           uuid primary key default gen_random_uuid(),
+  email        text,
+  email_key    text,          -- email en minuscules : une seule vidéo gratuite par adresse
+  ip_hash      text,          -- empreinte de la connexion (jamais l'adresse IP elle-même)
+  status       text not null default 'reserved',  -- reserved, pending, succeeded, failed
+  task_id      text,
+  storage_path text,
+  error        text,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+create index if not exists free_trials_created_idx on public.free_trials (created_at desc);
+create index if not exists free_trials_email_idx   on public.free_trials (email_key);
+create index if not exists free_trials_ip_idx      on public.free_trials (ip_hash, created_at desc);
+
+alter table public.free_trials enable row level security;
+-- Aucune règle d'accès : personne ne peut lire cette table depuis le navigateur.
+
+-- Réserve un essai gratuit, de façon atomique : une par email, une par connexion
+-- et par 24 h, et un plafond quotidien pour tout le site (ta dépense maximale).
+-- Les essais ratés (status 'failed') ne comptent pas.
+create or replace function public.reserve_free_trial(
+  p_email text, p_email_key text, p_ip_hash text, p_daily_total int
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  day_count int;
+  new_id    uuid;
+begin
+  perform pg_advisory_xact_lock(hashtextextended('droly_free_trial', 0));
+
+  if exists (
+    select 1 from public.free_trials
+     where email_key = lower(p_email_key) and status <> 'failed'
+  ) then
+    return jsonb_build_object('error', 'email_used');
+  end if;
+
+  if p_ip_hash is not null and exists (
+    select 1 from public.free_trials
+     where ip_hash = p_ip_hash and status <> 'failed'
+       and created_at > now() - interval '24 hours'
+  ) then
+    return jsonb_build_object('error', 'ip_used');
+  end if;
+
+  select count(*) into day_count from public.free_trials
+   where status <> 'failed' and created_at > now() - interval '24 hours';
+  if p_daily_total > 0 and day_count >= p_daily_total then
+    return jsonb_build_object('error', 'daily_full');
+  end if;
+
+  insert into public.free_trials (email, email_key, ip_hash)
+  values (p_email, lower(p_email_key), p_ip_hash)
+  returning id into new_id;
+  return jsonb_build_object('id', new_id);
+end;
+$$;
+
+revoke all on function public.reserve_free_trial(text, text, text, int) from public, anon, authenticated;
+grant execute on function public.reserve_free_trial(text, text, text, int) to service_role;
+
+
 -- 4) Stockage des fichiers vidéo (privé : jamais accessible sans être connecté).
 --    Chaque fichier est rangé dans un dossier au nom de son propriétaire :
 --    videos/<id-du-client>/<id-de-la-video>.mp4

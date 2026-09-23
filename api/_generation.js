@@ -216,10 +216,28 @@ async function claim(id) {
   return Array.isArray(data) ? data[0] || null : data || null;
 }
 
-// Vidéo terminée → fichier dans le stockage privé du client → entrée dans
-// "Mes vidéos". Peut être relancée sans créer de doublon.
-async function finalize(generation, videoUrl) {
-  const db = supabaseAdmin();
+// Où en est une tâche Seedance ? (utilisé par les vidéos des abonnés et par
+// les essais gratuits de la page d'accueil)
+export async function taskState(taskId) {
+  let task;
+  try {
+    task = await getVideoTask(taskId);
+  } catch (err) {
+    if (err.status === 404) return { state: 'failed', reason: 'Tâche Seedance introuvable' };
+    throw err;
+  }
+  if (task.status === 'succeeded') {
+    const url = task.content && task.content.video_url;
+    return url ? { state: 'succeeded', url } : { state: 'failed', reason: 'Réponse Seedance sans vidéo' };
+  }
+  if (task.status === 'failed' || task.status === 'cancelled' || task.status === 'expired') {
+    return { state: 'failed', reason: (task.error && task.error.message) || task.status };
+  }
+  return { state: 'pending' };
+}
+
+// Télécharge la vidéo finie et la range dans le stockage privé.
+export async function storeVideo(storagePath, videoUrl) {
   const download = await fetch(videoUrl, { signal: AbortSignal.timeout(25000) });
   if (!download.ok) {
     const err = new Error('Téléchargement de la vidéo impossible (' + download.status + ')');
@@ -227,12 +245,27 @@ async function finalize(generation, videoUrl) {
     throw err;
   }
   const bytes = new Uint8Array(await download.arrayBuffer());
-  const storagePath = `${generation.user_id}/${generation.id}.mp4`;
-
-  const upload = await db.storage
+  const upload = await supabaseAdmin().storage
     .from('videos')
     .upload(storagePath, bytes, { contentType: 'video/mp4', upsert: true });
   if (upload.error) throw new Error('Enregistrement du fichier impossible : ' + upload.error.message);
+}
+
+// Lien de lecture (ou de téléchargement) temporaire vers une vidéo rangée.
+export async function signedVideoUrl(storagePath, seconds = 3600, downloadName) {
+  const { data, error } = await supabaseAdmin().storage
+    .from('videos')
+    .createSignedUrl(storagePath, seconds, downloadName ? { download: downloadName } : undefined);
+  if (error) throw new Error('Lien de la vidéo impossible : ' + error.message);
+  return data.signedUrl;
+}
+
+// Vidéo terminée → fichier dans le stockage privé du client → entrée dans
+// "Mes vidéos". Peut être relancée sans créer de doublon.
+async function finalize(generation, videoUrl) {
+  const db = supabaseAdmin();
+  const storagePath = `${generation.user_id}/${generation.id}.mp4`;
+  await storeVideo(storagePath, videoUrl);
 
   const { data: video, error } = await db
     .from('videos')

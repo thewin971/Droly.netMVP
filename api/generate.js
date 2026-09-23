@@ -14,32 +14,16 @@
 //      /api/generation-status (rien n'est perdu, même si la page est fermée)
 
 import {
-  configError, fail, getFreshSubscriptionRow, getUser, handler, isActive,
+  checkImage, configError, fail, getFreshSubscriptionRow, getUser, handler, isActive,
   json, limits, supabaseAdmin,
 } from './_shared.js';
 import {
   advance, createVideoTask, markFailed, MAX_EXTRA_IMAGES, POLL_INTERVAL_MS, sleep, updateGeneration,
 } from './_generation.js';
 
-const DATA_URI = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
-const MAX_DATA_URI_LENGTH = 5 * 1024 * 1024; // photo envoyée directement (la page la compresse sous 3,5 Mo)
 // Doit rester bien en dessous de la durée maximale d'une fonction (60 s,
 // réglée dans vercel.json) pour laisser le temps de ranger la vidéo.
 const WAIT_BEFORE_HANDOFF_MS = 30000;
-
-function checkImage(image) {
-  if (typeof image !== 'string' || !image) return 'Ajoutez une photo ou un lien vers une photo.';
-  if (image.startsWith('data:')) {
-    if (image.length > MAX_DATA_URI_LENGTH) return 'Photo trop lourde (5 Mo maximum).';
-    if (!DATA_URI.test(image)) return 'Format de photo non pris en charge (JPEG, PNG ou WebP).';
-    return null;
-  }
-  let url;
-  try { url = new URL(image); } catch { return "Le lien de la photo n'est pas valide."; }
-  if (url.protocol !== 'https:') return 'Le lien de la photo doit commencer par https://';
-  if (image.length > 2048) return 'Le lien de la photo est trop long.';
-  return null;
-}
 
 export default handler('generate', async (request) => {
   if (request.method !== 'POST') return fail(405, 'method_not_allowed', 'Méthode non autorisée.');

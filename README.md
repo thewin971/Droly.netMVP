@@ -20,6 +20,8 @@ droly/
 │   ├── sync-checkout.js    POST /api/sync-checkout    active l'abonnement au retour du paiement
 │   ├── stripe-webhook.js   POST /api/stripe-webhook   reçoit les événements Stripe
 │   ├── billing-portal.js   POST /api/billing-portal   factures / carte / résiliation (Stripe)
+│   ├── free-trial.js       POST /api/free-trial       la vidéo gratuite de la page d'accueil (garde-fous inclus)
+│   ├── free-trial-status.js POST /api/free-trial-status suit la vidéo gratuite jusqu'à ce qu'elle soit prête
 │   ├── listing-photos.js   POST /api/listing-photos   propose les photos publiques d'une page d'annonce
 │   ├── generate.js         POST /api/generate         lance une vidéo (abonnés uniquement, limites incluses)
 │   ├── generation-status.js POST /api/generation-status suit une vidéo en cours jusqu'à ce qu'elle soit prête
@@ -35,7 +37,9 @@ droly/
 
 ## Parcours client
 
-1. Sur l'accueil, le visiteur colle le lien de son annonce et voit un **exemple de rendu** (gratuit).
+1. Sur l'accueil, le visiteur colle le lien de son annonce, laisse son email, ajoute une photo et reçoit
+   **une vraie vidéo, offerte** (une par email, une par connexion et par jour, et un plafond quotidien pour tout le site :
+   `FREE_TRIALS_PER_DAY`, 20 par défaut, soit environ 2 $ par jour au maximum).
 2. **Créer mon compte** → `app.html` : inscription (email + mot de passe).
 3. **S'abonner** → page de paiement **Stripe** (la carte n'est jamais saisie sur Droly).
 4. Retour sur l'espace client, abonnement actif :

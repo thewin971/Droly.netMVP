@@ -133,6 +133,15 @@ section[id]{scroll-margin-top:90px;}
 .flow-secure{font-size:0.75rem;color:var(--ink-mute);text-align:center;margin:16px 0 0;}
 .flow-success-icon{width:52px;height:52px;border-radius:50%;background:rgba(255,90,95,0.15);border:1px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 0 20px;font-size:1.5rem;}
 .flow-submit[disabled]{opacity:0.7;cursor:default;}
+.trial-drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:150px;padding:18px;border:1.5px dashed var(--line-strong);border-radius:var(--radius-m);background:var(--bg);cursor:pointer;margin:0 0 16px;overflow:hidden;}
+.trial-drop input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;}
+.trial-drop strong{font-size:0.9375rem;}
+.trial-drop span{font-size:0.8125rem;color:var(--ink-mute);}
+.trial-drop img{max-width:100%;max-height:170px;border-radius:10px;display:block;}
+.flow-error,.flow-note{border-radius:12px;padding:12px 14px;font-size:0.875rem;line-height:1.5;margin:0 0 16px;}
+.flow-error{background:rgba(255,90,95,0.12);border:1px solid rgba(255,90,95,0.4);color:#ffd9da;}
+.flow-note{background:var(--bg-elev-2);border:1px solid var(--line);color:var(--ink-dim);}
+#flowResultFrame video{width:100%;height:100%;object-fit:contain;background:#000;}
 
 /* QUIZ TEASER (après la vidéo hero) */
 .quiz-teaser-card{display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap;background:var(--bg-elev);border:1px solid var(--line-strong);border-radius:var(--radius-m);padding:30px 34px;}
@@ -342,7 +351,7 @@ section[id]{scroll-margin-top:90px;}
           <input type="url" inputmode="url" class="try-input" id="listingUrl" placeholder="Collez le lien de l’annonce (Airbnb et Leboncoin)" autocomplete="off">
           <button type="submit" class="btn-primary">Essayer</button>
         </form>
-        <p class="try-hint" id="tryHint">Aperçu gratuit, sans carte bancaire.</p>
+        <p class="try-hint" id="tryHint">Une vidéo gratuite, sans carte bancaire.</p>
       </div>
       <div class="hero-visual reveal reveal-scale">
         <div class="hero-frame">
@@ -481,35 +490,56 @@ section[id]{scroll-margin-top:90px;}
   <div class="flow-panel">
     <button class="flow-close" id="flowClose" type="button" aria-label="Fermer">✕</button>
 
-    <div class="flow-step" data-step="processing">
-      <p class="flow-eyebrow">Étape 1 / 2</p>
-      <div class="flow-spinner" aria-hidden="true"></div>
-      <h3>Préparation de votre aperçu…</h3>
-      <ul class="flow-tasks" id="flowTasks">
-        <li data-task="fetch">Lecture du lien de l’annonce</li>
-        <li data-task="camera">Choix des mouvements de caméra</li>
-        <li data-task="render">Assemblage d’un exemple de rendu</li>
-      </ul>
+    <div class="flow-step" data-step="form">
+      <p class="flow-eyebrow">Votre vidéo gratuite</p>
+      <h3>Une vidéo offerte, sans carte bancaire</h3>
+      <p>Ajoutez une photo de votre annonce : nous en faisons une vidéo « plan drone » de 5 secondes, à vous, à télécharger.</p>
+      <div id="trialMsg"></div>
+      <label class="trial-drop" id="trialDrop">
+        <input type="file" id="trialPhoto" accept="image/jpeg,image/png,image/webp,image/*">
+        <strong id="trialDropTitle">Choisir une photo</strong>
+        <span id="trialDropSub">Depuis votre téléphone ou votre ordinateur</span>
+      </label>
+      <p class="flow-url-echo" id="flowUrlLine">Pour l’annonce : <span id="flowUrlEcho"></span></p>
+      <div class="flow-fields">
+        <div>
+          <label for="trialEmail">Votre email</label>
+          <input type="email" id="trialEmail" inputmode="email" autocomplete="email" placeholder="vous@exemple.fr">
+        </div>
+      </div>
+      <button class="btn-primary flow-block" id="trialSubmit" type="button" style="margin-top:18px;">Générer ma vidéo gratuite</button>
+      <p class="flow-secure">Une vidéo gratuite par personne. Aucun paiement, aucune carte demandée.</p>
     </div>
 
-    <div class="flow-step" data-step="preview">
-      <p class="flow-eyebrow">Étape 2 / 2</p>
-      <span class="flow-badge">Exemple de rendu</span>
-      <div class="flow-preview-frame" id="flowPreviewFrame">
-        <span class="flow-watermark">EXEMPLE DROLY</span>
+    <div class="flow-step" data-step="processing">
+      <p class="flow-eyebrow">En cours</p>
+      <div class="flow-spinner" aria-hidden="true"></div>
+      <h3>Votre vidéo est en fabrication…</h3>
+      <ul class="flow-tasks" id="flowTasks">
+        <li data-task="photo">Lecture de votre photo</li>
+        <li data-task="camera">Choix du mouvement de caméra</li>
+        <li data-task="render">Fabrication de la vidéo</li>
+      </ul>
+      <p class="flow-secure" style="margin-top:22px;">En général 1 à 3 minutes. Ne fermez pas cette page.</p>
+    </div>
+
+    <div class="flow-step" data-step="result">
+      <span class="flow-badge">Votre vidéo</span>
+      <div class="flow-preview-frame" id="flowResultFrame">
+        <video id="trialVideo" controls playsinline preload="metadata"></video>
       </div>
-      <h3>Voici le type de vidéo que vous obtiendrez</h3>
-      <p class="flow-url-echo">Pour l’annonce : <span id="flowUrlEcho"></span></p>
-      <p>Créez votre compte et abonnez-vous pour générer la vraie vidéo de cette annonce, sans filigrane.</p>
+      <h3>Elle est à vous</h3>
+      <p>Téléchargez-la et utilisez-la comme vous voulez. Pour en générer d’autres, et des tours à 360°, créez votre compte.</p>
+      <a class="btn-primary flow-block" id="trialDownload" href="#" download>Télécharger ma vidéo</a>
       <div class="flow-plan">
         <div>
           <div class="name">Abonnement Droly Créateur</div>
-          <div class="sub">Vidéos sans filigrane, sans engagement</div>
+          <div class="sub">Vidéos et tours 360° sans filigrane, sans engagement</div>
         </div>
         <div class="price">29€<span style="font-size:0.75rem;color:var(--ink-mute);font-weight:500;">/mois</span></div>
       </div>
       <a class="btn-primary flow-block" id="flowUnlockBtn" href="app.html?signup=1">Créer mon compte</a>
-      <button class="link-secondary flow-block" id="flowRetryBtn" type="button" style="background:none;border:none;cursor:pointer;">Essayer un autre lien</button>
+      <button class="link-secondary flow-block" id="flowRetryBtn" type="button" style="background:none;border:none;cursor:pointer;">Fermer</button>
       <p class="flow-secure">Paiement sécurisé par Stripe. Résiliable à tout moment.</p>
     </div>
 
@@ -565,10 +595,15 @@ section[id]{scroll-margin-top:90px;}
     if(!overlay) return;
     var stepEls = overlay.querySelectorAll('.flow-step');
     var flowUrlEcho = document.getElementById('flowUrlEcho');
-    var previewFrame = document.getElementById('flowPreviewFrame');
-    var previewCloneSrc = document.getElementById('heroVideo');
-    var previewVideoEl = null;
-
+    var trialMsg = document.getElementById('trialMsg');
+    var trialPhoto = document.getElementById('trialPhoto');
+    var trialEmail = document.getElementById('trialEmail');
+    var trialSubmit = document.getElementById('trialSubmit');
+    var trialVideo = document.getElementById('trialVideo');
+    var trialDownload = document.getElementById('trialDownload');
+    var preparedPhoto = null;
+    var listingValue = '';
+    var running = false;
 
     function showStep(name){
       stepEls.forEach(function(s){ s.classList.toggle('active', s.getAttribute('data-step') === name); });
@@ -579,6 +614,7 @@ section[id]{scroll-margin-top:90px;}
       document.body.style.overflow = 'hidden';
     }
     function closeOverlay(){
+      if(running) return;
       overlay.classList.remove('open');
       overlay.setAttribute('aria-hidden','true');
       document.body.style.overflow = '';
@@ -589,48 +625,149 @@ section[id]{scroll-margin-top:90px;}
         return u.protocol === 'http:' || u.protocol === 'https:';
       }catch(e){ return false; }
     }
-    function clearPreviewVideo(){
-      if(previewVideoEl && previewVideoEl.parentNode){ previewVideoEl.parentNode.removeChild(previewVideoEl); }
-      previewVideoEl = null;
+    function say(type, text){
+      trialMsg.textContent = '';
+      if(!text) return;
+      var d = document.createElement('div');
+      d.className = type === 'error' ? 'flow-error' : 'flow-note';
+      d.textContent = text;
+      trialMsg.appendChild(d);
     }
-    function ensureDemoPreviewVideo(){
-      clearPreviewVideo();
-      if(!previewFrame || !previewCloneSrc) return;
-      previewVideoEl = previewCloneSrc.cloneNode(true);
-      previewVideoEl.removeAttribute('id');
-      previewVideoEl.muted = true;
-      previewVideoEl.setAttribute('muted','');
-      previewVideoEl.autoplay = true;
-      previewVideoEl.loop = true;
-      previewVideoEl.playsInline = true;
-      previewFrame.insertBefore(previewVideoEl, previewFrame.firstChild);
-      var playIt = function(){ previewVideoEl.play().catch(function(){}); };
-      if(previewVideoEl.readyState >= 2){ playIt(); } else { previewVideoEl.addEventListener('loadeddata', playIt, { once:true }); }
-    }
-    function resetTasks(){
-      var tasks = Array.prototype.slice.call(overlay.querySelectorAll('.flow-tasks li'));
-      tasks.forEach(function(t){ t.classList.remove('done','doing'); });
-      return tasks;
-    }
+    function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
 
-    function runDemoGeneration(){
-      showStep('processing');
-      var tasks = resetTasks();
-      var i = 0;
-      function next(){
-        if(i > 0){ tasks[i-1].classList.remove('doing'); tasks[i-1].classList.add('done'); }
-        if(i < tasks.length){
-          tasks[i].classList.add('doing');
-          i++;
-          setTimeout(next, 650 + Math.random()*450);
-        } else {
-          ensureDemoPreviewVideo();
-          setTimeout(function(){ showStep('preview'); }, 450);
-        }
+    async function apiPost(path, body){
+      var res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      var data = null;
+      try { data = await res.json(); } catch(e){}
+      if(!res.ok){
+        var err = new Error((data && data.message) || 'Le serveur ne répond pas. Réessayez dans un instant.');
+        err.code = data && data.error;
+        throw err;
       }
-      next();
+      return data || {};
     }
 
+    // Compresse la photo dans le navigateur : envoi plus rapide, et rien de
+    // trop lourd n'arrive au serveur.
+    function preparePhoto(file){
+      return new Promise(function(resolve, reject){
+        if(!file.type || file.type.indexOf('image/') !== 0) return reject(new Error('Ce fichier n’est pas une photo.'));
+        var objectUrl = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function(){
+          try{
+            var sw = img.naturalWidth, sh = img.naturalHeight, sx = 0, sy = 0;
+            if(!sw || !sh) throw new Error('Photo illisible.');
+            var ratio = sw / sh;
+            if(ratio > 2){ var nw = sh * 2; sx = (sw - nw) / 2; sw = nw; }
+            else if(ratio < 0.5){ var nh = sw * 2; sy = (sh - nh) / 2; sh = nh; }
+            var attempts = [[1600, 0.82], [1280, 0.74], [1024, 0.7], [800, 0.65]];
+            for(var i = 0; i < attempts.length; i++){
+              var scale = Math.min(1, attempts[i][0] / Math.max(sw, sh));
+              var w = Math.max(1, Math.round(sw * scale)), h = Math.max(1, Math.round(sh * scale));
+              var canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+              var data = canvas.toDataURL('image/jpeg', attempts[i][1]);
+              if(data.indexOf('data:image/jpeg') === 0 && data.length <= 2000000) return resolve(data);
+            }
+            reject(new Error('Photo trop lourde, même après compression.'));
+          }catch(e){ reject(e); }
+          finally{ URL.revokeObjectURL(objectUrl); }
+        };
+        img.onerror = function(){ URL.revokeObjectURL(objectUrl); reject(new Error('Impossible de lire cette photo.')); };
+        img.src = objectUrl;
+      });
+    }
+
+    if(trialPhoto){
+      trialPhoto.addEventListener('change', async function(){
+        var file = this.files && this.files[0];
+        say(null, '');
+        if(!file) return;
+        var title = document.getElementById('trialDropTitle');
+        title.textContent = 'Préparation…';
+        try{
+          preparedPhoto = await preparePhoto(file);
+          var drop = document.getElementById('trialDrop');
+          var old = drop.querySelector('img');
+          if(old) old.remove();
+          var im = document.createElement('img');
+          im.src = preparedPhoto; im.alt = 'Photo choisie';
+          drop.insertBefore(im, title);
+          title.textContent = 'Photo prête';
+          document.getElementById('trialDropSub').textContent = 'Touchez pour changer de photo';
+        }catch(err){
+          preparedPhoto = null;
+          title.textContent = 'Choisir une photo';
+          say('error', err.message);
+        }
+      });
+    }
+
+    function markTasks(index){
+      var tasks = Array.prototype.slice.call(overlay.querySelectorAll('.flow-tasks li'));
+      tasks.forEach(function(t, i){
+        t.classList.toggle('done', i < index);
+        t.classList.toggle('doing', i === index);
+      });
+    }
+
+    function showResult(video){
+      trialVideo.src = video.url;
+      trialDownload.setAttribute('href', video.downloadUrl || video.url);
+      showStep('result');
+    }
+
+    async function waitForTrial(trialId){
+      var deadline = Date.now() + 10 * 60 * 1000;
+      while(Date.now() < deadline){
+        await sleep(5000);
+        var r;
+        try { r = await apiPost('/api/free-trial-status', { trialId: trialId }); }
+        catch(err){ continue; }
+        if(r.video) return r.video;
+        if(r.failed) throw new Error(r.message);
+      }
+      throw new Error('La vidéo prend plus de temps que prévu. Réessayez dans quelques minutes.');
+    }
+
+    async function startTrial(){
+      var email = (trialEmail.value || '').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) return say('error', 'Indiquez une adresse email valide.');
+      if(!preparedPhoto && !listingValue) return say('error', 'Ajoutez une photo de votre annonce.');
+      say(null, '');
+      running = true;
+      trialSubmit.disabled = true;
+      showStep('processing');
+      markTasks(0);
+      try{
+        var payload = { email: email };
+        if(preparedPhoto) payload.image = preparedPhoto; else payload.listingUrl = listingValue;
+        markTasks(1);
+        var data = await apiPost('/api/free-trial', payload);
+        markTasks(2);
+        var video = data.video || (data.pending && data.trialId ? await waitForTrial(data.trialId) : null);
+        if(!video) throw new Error('Réponse inattendue du serveur. Réessayez dans un instant.');
+        if(unlockLink){
+          unlockLink.setAttribute('href', 'app.html?signup=1&email=' + encodeURIComponent(email) +
+            (listingValue ? '&listing=' + encodeURIComponent(listingValue) : ''));
+        }
+        showResult(video);
+      }catch(err){
+        showStep('form');
+        say('error', err.message);
+      }finally{
+        running = false;
+        trialSubmit.disabled = false;
+      }
+    }
+
+    if(trialSubmit){ trialSubmit.addEventListener('click', startTrial); }
 
     if(tryForm){
       tryForm.addEventListener('submit', function(e){
@@ -645,11 +782,14 @@ section[id]{scroll-margin-top:90px;}
         }
         listingUrl.classList.remove('error');
         tryHint.classList.remove('error');
-        tryHint.textContent = 'Aperçu gratuit, sans carte bancaire.';
+        tryHint.textContent = 'Une vidéo gratuite, sans carte bancaire.';
+        listingValue = val;
         if(flowUrlEcho){ flowUrlEcho.textContent = val; }
         if(unlockLink){ unlockLink.setAttribute('href', 'app.html?signup=1&listing=' + encodeURIComponent(val)); }
+        say(null, '');
         openOverlay();
-        runDemoGeneration();
+        showStep('form');
+        setTimeout(function(){ trialEmail && trialEmail.focus(); }, 300);
       });
     }
 
@@ -668,7 +808,6 @@ section[id]{scroll-margin-top:90px;}
     if(retryBtn){
       retryBtn.addEventListener('click', function(){
         closeOverlay();
-        if(listingUrl){ listingUrl.value = ''; listingUrl.focus(); }
       });
     }
 

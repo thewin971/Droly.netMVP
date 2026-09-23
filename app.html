@@ -451,6 +451,7 @@ function sleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
 
 if (params.get('listing')) store(LISTING_KEY, params.get('listing'));
 var wantsSignupFirst = params.get('signup') === '1';
+var prefilledEmail = (params.get('email') || '').trim();   // venu de l'essai gratuit de l'accueil
 var checkoutResult = params.get('checkout');           // 'success' | 'cancel' | null
 var checkoutSessionId = params.get('session_id');
 var initialTab = params.get('tab');
@@ -682,6 +683,7 @@ function showAuth(mode){
   } else {
     setAuthMode(mode || 'signup');
   }
+  if (prefilledEmail && !$('#authEmail').value) $('#authEmail').value = prefilledEmail;
   show('auth');
 }
 
