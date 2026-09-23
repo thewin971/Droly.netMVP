@@ -1,0 +1,40 @@
+name: Installer le site depuis le zip
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Deballer le zip le plus recent
+        run: |
+          set -e
+          ZIP=""; BEST=-1
+          for f in *.zip; do
+            [ -f "$f" ] || continue
+            T=$(git log -1 --format=%ct -- "$f"); T=${T:-0}
+            if [ "$T" -ge "$BEST" ]; then BEST=$T; ZIP=$f; fi
+          done
+          if [ -z "$ZIP" ]; then echo "Aucun zip a installer"; exit 0; fi
+          echo "Zip installe : $ZIP"
+          rm -rf /tmp/site && mkdir -p /tmp/site
+          unzip -q -o "$ZIP" -d /tmp/site
+          IDX=$(find /tmp/site -name index.html -not -path '*/__MACOSX/*' | awk -F/ '{print NF "\t" $0}' | sort -n | head -n 1 | cut -f2-)
+          if [ -z "$IDX" ]; then echo "Pas de index.html dans le zip"; exit 1; fi
+          SRC=$(dirname "$IDX")
+          rm -rf "$SRC/.git" "$SRC/.github"
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github -exec rm -rf {} +
+          cp -a "$SRC"/. .
+      - name: Enregistrer a ton nom (sinon Vercel gratuit refuse de publier)
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Rien a enregistrer"; exit 0; fi
+          git commit -m "Installe le site depuis le zip"
+          git push
