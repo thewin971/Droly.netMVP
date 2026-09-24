@@ -59,9 +59,13 @@ export const DURATIONS = { travelling: 5, tour: 10 };
 export const MAX_EXTRA_IMAGES = 3;
 
 // Consignes envoyées au modèle (en anglais : les modèles les suivent mieux).
+// Plan drone : un vrai mouvement de caméra bien visible (et pas un simple
+// zoom lent), qui marche aussi bien pour une façade que pour une pièce.
 export const DEFAULT_PROMPT =
-  'Slow, smooth cinematic real estate camera movement gently moving forward through the room, ' +
-  'stable and realistic, natural light, no people, no text, no logo.';
+  'Cinematic real estate drone shot with clear, continuous camera motion from the first frame: ' +
+  'the camera glides steadily forward into the scene while rising slightly and arcing to one side, ' +
+  'creating strong parallax and depth, like a professional drone or gimbal fly-through. ' +
+  'Smooth and stable, straight architecture, realistic, natural light, no people, no text, no logo.';
 
 // Pour un tour, la même photo sert d'image de début ET de fin : la caméra doit
 // donc faire le tour complet et revenir exactement à son point de départ.
