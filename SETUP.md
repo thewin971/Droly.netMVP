@@ -221,7 +221,8 @@ Projet Vercel → **Settings → Environment Variables**. Ajoute chaque ligne (N
 | `STRIPE_SECRET_KEY` | clé `sk_test_…` |
 | `STRIPE_PRICE_ID` | identifiant `price_…` |
 | `STRIPE_WEBHOOK_SECRET` | secret `whsec_…` |
-| `SEEDANCE_API_KEY` | ta clé API BytePlus ModelArk (étape 3bis) |
+| `FAL_KEY` | **conseillé** : ta clé fal.ai (fal.ai → API Keys → Add key). Si elle est renseignée, les vidéos sont fabriquées chez fal.ai (Seedance 1.0 Pro Fast pour les plans drone ≈ 0,11 $, Seedance 1.5 Pro sans son pour les tours ≈ 0,26 $). Pas de numéro de TVA demandé. |
+| `SEEDANCE_API_KEY` | ou bien ta clé API BytePlus ModelArk (étape 3bis), utilisée seulement si `FAL_KEY` est vide. Une seule des deux clés suffit. |
 
 Facultatif :
 

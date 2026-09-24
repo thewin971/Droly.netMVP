@@ -6,6 +6,7 @@
 
 import { configError, fail, handler, json } from './_shared.js';
 import { advanceTrial, getTrial, TRIAL_FAILED_MESSAGE } from './_trial.js';
+import { videoKeyName } from './_generation.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Une tâche sans identifiant Seedance au bout de 3 minutes ne viendra plus.
@@ -14,7 +15,7 @@ const STUCK_MS = 3 * 60 * 1000;
 export default handler('free-trial-status', async (request) => {
   if (request.method !== 'POST') return fail(405, 'method_not_allowed', 'Méthode non autorisée.');
 
-  const missing = configError(['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SEEDANCE_API_KEY']);
+  const missing = configError(['SUPABASE_URL', 'SUPABASE_SECRET_KEY', videoKeyName()]);
   if (missing) return missing;
 
   const body = await request.json().catch(() => null);

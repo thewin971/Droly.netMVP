@@ -8,7 +8,7 @@
 import {
   checkImage, configError, fail, handler, ipFingerprint, json, limits, supabaseAdmin,
 } from './_shared.js';
-import { createVideoTask, POLL_INTERVAL_MS, sleep } from './_generation.js';
+import { createVideoTask, POLL_INTERVAL_MS, sleep, videoKeyName } from './_generation.js';
 import { advanceTrial, markTrialFailed, updateTrial } from './_trial.js';
 import { fetchListingPhotos } from './_listing.js';
 
@@ -18,7 +18,7 @@ const WAIT_BEFORE_HANDOFF_MS = 30000;
 export default handler('free-trial', async (request) => {
   if (request.method !== 'POST') return fail(405, 'method_not_allowed', 'Méthode non autorisée.');
 
-  const missing = configError(['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SEEDANCE_API_KEY']);
+  const missing = configError(['SUPABASE_URL', 'SUPABASE_SECRET_KEY', videoKeyName()]);
   if (missing) return missing;
 
   const { freeTrialsPerDay } = limits();
@@ -74,12 +74,18 @@ export default handler('free-trial', async (request) => {
   } catch (err) {
     await markTrialFailed(trialId, err && err.message);
     const status = err && typeof err.status === 'number' ? err.status : null;
-    console.error('[droly-api:free-trial] Création Seedance refusée :', status, err && err.message);
+    console.error('[droly-api:free-trial] Création de la vidéo refusée :', status, err && err.message);
     if (status === 400 || status === 422) {
       return fail(400, 'generation_rejected',
         'Cette photo a été refusée (votre essai gratuit reste disponible). Essayez une autre photo, au format paysage.');
     }
     if (status === 429) return fail(503, 'busy', 'Le service est très sollicité. Réessayez dans une minute.');
+    if (status === 401 || status === 403 || status === 404) {
+      // Clé refusée, crédit épuisé ou modèle non activé chez le fournisseur :
+      // le détail est dans les journaux Vercel (ligne ci-dessus).
+      return fail(503, 'provider_unavailable',
+        'Le service vidéo n’est pas disponible pour le moment (votre essai gratuit reste disponible). Réessayez un peu plus tard.');
+    }
     throw err;
   }
   await updateTrial(trialId, { status: 'pending', task_id: taskId });

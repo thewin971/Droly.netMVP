@@ -8,7 +8,7 @@
 // Réservé aux clients connectés ET abonnés : sinon n'importe qui pourrait
 // générer des vidéos à tes frais. Étapes :
 //   1. vérifie le compte, l'abonnement et les limites (table "generations")
-//   2. lance la vidéo chez Dreamina Seedance (BytePlus ModelArk)
+//   2. lance la vidéo chez Seedance (fal.ai ou BytePlus ModelArk)
 //   3. attend jusqu'à ~30 s ; si elle est prête, la range dans "Mes vidéos"
 //   4. sinon répond "en cours" : la page prend le relais avec
 //      /api/generation-status (rien n'est perdu, même si la page est fermée)
@@ -19,6 +19,7 @@ import {
 } from './_shared.js';
 import {
   advance, createVideoTask, markFailed, MAX_EXTRA_IMAGES, POLL_INTERVAL_MS, sleep, updateGeneration,
+  videoKeyName,
 } from './_generation.js';
 
 // Doit rester bien en dessous de la durée maximale d'une fonction (60 s,
@@ -30,7 +31,7 @@ export default handler('generate', async (request) => {
 
   const missing = configError([
     'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY',
-    'STRIPE_SECRET_KEY', 'SEEDANCE_API_KEY',
+    'STRIPE_SECRET_KEY', videoKeyName(),
   ]);
   if (missing) return missing;
 
@@ -97,13 +98,19 @@ export default handler('generate', async (request) => {
   } catch (err) {
     await markFailed(generationId, err && err.message);
     const status = err && typeof err.status === 'number' ? err.status : null;
-    console.error('[droly-api:generate] Création Seedance refusée :', status, err && err.message);
+    console.error('[droly-api:generate] Création de la vidéo refusée :', status, err && err.message);
     if (status === 400 || status === 422) {
       return fail(400, 'generation_rejected',
         'Cette photo a été refusée. Essayez une autre photo (JPEG ou PNG, format paysage).');
     }
     if (status === 429) {
       return fail(503, 'busy', 'Le service est très sollicité. Réessayez dans une minute.');
+    }
+    if (status === 401 || status === 403 || status === 404) {
+      // Clé refusée, crédit épuisé ou modèle non activé chez le fournisseur :
+      // le détail est dans les journaux Vercel (ligne ci-dessus).
+      return fail(503, 'provider_unavailable',
+        'Le service vidéo n’est pas disponible pour le moment (cette vidéo n’est pas décomptée). Réessayez un peu plus tard.');
     }
     throw err;
   }

@@ -243,24 +243,40 @@ grant execute on function public.reserve_free_trial(text, text, text, int) to se
 -- 4) Stockage des fichiers vidéo (privé : jamais accessible sans être connecté).
 --    Chaque fichier est rangé dans un dossier au nom de son propriétaire :
 --    videos/<id-du-client>/<id-de-la-video>.mp4
-insert into storage.buckets (id, name, public)
-values ('videos', 'videos', false)
-on conflict (id) do nothing;
+--
+--    Sur certains projets Supabase, l'éditeur SQL n'a pas le droit de toucher au
+--    stockage : dans ce cas, ce bloc n'échoue pas, il affiche un message et il
+--    reste deux choses à faire à la main (voir SETUP.md, étape 2bis) :
+--      - créer un bucket PRIVÉ nommé "videos" dans Storage ;
+--      - y ajouter les deux règles ci-dessous depuis Storage → Policies.
+do $$
+begin
+  insert into storage.buckets (id, name, public)
+  values ('videos', 'videos', false)
+  on conflict (id) do nothing;
+exception when insufficient_privilege or undefined_table then
+  raise notice 'Stockage : crée toi-même un bucket PRIVÉ nommé "videos" dans Storage.';
+end $$;
 
-drop policy if exists "Lire ses fichiers video" on storage.objects;
-create policy "Lire ses fichiers video"
-  on storage.objects for select
-  to authenticated
-  using (
-    bucket_id = 'videos'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
+do $$
+begin
+  drop policy if exists "Lire ses fichiers video" on storage.objects;
+  create policy "Lire ses fichiers video"
+    on storage.objects for select
+    to authenticated
+    using (
+      bucket_id = 'videos'
+      and (storage.foldername(name))[1] = (select auth.uid())::text
+    );
 
-drop policy if exists "Supprimer ses fichiers video" on storage.objects;
-create policy "Supprimer ses fichiers video"
-  on storage.objects for delete
-  to authenticated
-  using (
-    bucket_id = 'videos'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
+  drop policy if exists "Supprimer ses fichiers video" on storage.objects;
+  create policy "Supprimer ses fichiers video"
+    on storage.objects for delete
+    to authenticated
+    using (
+      bucket_id = 'videos'
+      and (storage.foldername(name))[1] = (select auth.uid())::text
+    );
+exception when insufficient_privilege or undefined_table then
+  raise notice 'Stockage : ajoute les deux règles depuis Storage → Policies (voir SETUP.md, étape 2bis).';
+end $$;

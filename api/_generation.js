@@ -1,8 +1,13 @@
 // Outils de génération partagés par /api/generate et /api/generation-status.
 // (Le "_" empêche Vercel d'en faire une adresse publique.)
 //
-// Les vidéos sont fabriquées par Dreamina Seedance (ByteDance), via l'API
-// BytePlus ModelArk.
+// Les vidéos sont fabriquées par les modèles Seedance (ByteDance), chez l'un
+// de ces deux fournisseurs :
+//  - fal.ai : utilisé dès que la variable FAL_KEY est renseignée dans Vercel
+//    (pas de numéro de TVA demandé, tours à 360° moins chers) ;
+//  - BytePlus ModelArk : utilisé sinon, avec la variable SEEDANCE_API_KEY.
+// Une vidéo lancée chez l'un est toujours suivie chez le même, même si tu
+// changes de fournisseur entre-temps (l'identifiant de tâche le mémorise).
 //
 // Principe : chaque vidéo demandée est inscrite dans la table "generations"
 // AVANT d'appeler Seedance. Si la génération prend plus de temps que prévu
@@ -27,6 +32,28 @@ import { env, supabaseAdmin } from './_shared.js';
 export const DEFAULT_MODEL = 'seedance-1-0-pro-fast-251015';
 export const DEFAULT_TOUR_MODEL = 'dreamina-seedance-2-0-mini-260615';
 const DEFAULT_BASE_URL = 'https://ark.ap-southeast.bytepluses.com/api/v3';
+
+// Chez fal.ai (variables FAL_MODEL et FAL_TOUR_MODEL pour en changer) :
+//  - plan drone : Seedance 1.0 Pro Fast (environ 0,11 $ la vidéo de 5 s en 720p) ;
+//  - tour : Seedance 1.5 Pro sans son (environ 0,26 $ le tour de 10 s en 720p),
+//    qui accepte une image de début ET de fin. Les photos de référence
+//    supplémentaires ne sont pas utilisées chez ce fournisseur.
+export const FAL_DEFAULT_MODEL = 'fal-ai/bytedance/seedance/v1/pro/fast/image-to-video';
+export const FAL_DEFAULT_TOUR_MODEL = 'fal-ai/bytedance/seedance/v1.5/pro/image-to-video';
+const FAL_QUEUE = 'https://queue.fal.run/';
+const FAL_PREFIX = 'fal:';
+
+export function videoProvider() {
+  return env('FAL_KEY') ? 'fal' : 'byteplus';
+}
+
+// Nom de la clé vidéo à exiger : celle qui est renseignée, sinon FAL_KEY
+// (le fournisseur conseillé), pour que le message d'erreur soit clair.
+export function videoKeyName() {
+  if (env('FAL_KEY')) return 'FAL_KEY';
+  if (env('SEEDANCE_API_KEY')) return 'SEEDANCE_API_KEY';
+  return 'FAL_KEY';
+}
 
 export const DURATIONS = { travelling: 5, tour: 10 };
 export const MAX_EXTRA_IMAGES = 3;
@@ -59,6 +86,10 @@ export const FAILED_MESSAGE =
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function videoModel(kind) {
+  if (videoProvider() === 'fal') {
+    if (kind === 'tour') return env('FAL_TOUR_MODEL') || FAL_DEFAULT_TOUR_MODEL;
+    return env('FAL_MODEL') || FAL_DEFAULT_MODEL;
+  }
   if (kind === 'tour') return env('SEEDANCE_TOUR_MODEL') || DEFAULT_TOUR_MODEL;
   return env('SEEDANCE_MODEL') || DEFAULT_MODEL;
 }
@@ -119,6 +150,101 @@ export async function inlineRemoteImage(image) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// fal.ai
+// ---------------------------------------------------------------------------
+
+// Appel à l'API fal.ai (file d'attente). En cas d'erreur, l'exception porte le
+// code HTTP (err.status).
+async function falFetch(url, init, timeoutMs) {
+  const res = await fetch(url, {
+    ...init,
+    headers: { 'Content-Type': 'application/json', Authorization: 'Key ' + env('FAL_KEY') },
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { data = null; }
+  if (!res.ok) {
+    const detail = data && (data.detail || data.error || data.message);
+    const info = typeof detail === 'string' ? detail : JSON.stringify(detail || text.slice(0, 200));
+    const err = new Error('fal ' + res.status + ' ' + String(info).slice(0, 300));
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+// Prépare la demande envoyée à fal.ai.
+export function buildFalBody({ model, kind, variant, image }) {
+  const tour = kind === 'tour';
+  const body = {
+    prompt: tour ? TOUR_PROMPTS[variant] || TOUR_PROMPTS.exterior : DEFAULT_PROMPT,
+    image_url: image,
+    resolution: '720p',
+    aspect_ratio: '16:9',
+    duration: String(tour ? DURATIONS.tour : DURATIONS.travelling),
+    enable_safety_checker: true,
+  };
+  // Même photo au début et à la fin : la caméra fait le tour complet.
+  if (tour) body.end_image_url = image;
+  // Les modèles récents ajoutent du son par défaut (plus cher) : on le coupe.
+  if (/v1\.5|seedance-2|seedance\/v2/.test(model)) body.generate_audio = false;
+  return body;
+}
+
+// Adresse du résultat d'une tâche fal.ai (seules les adresses de fal.ai sont
+// acceptées : la clé n'est jamais envoyée ailleurs).
+function falResponseUrl(taskId) {
+  const url = String(taskId).slice(FAL_PREFIX.length);
+  return url.startsWith(FAL_QUEUE) && !/[\s?#]/.test(url) ? url.replace(/\/+$/, '') : null;
+}
+
+async function createFalTask(model, kind, variant, image, extraCount) {
+  if (extraCount) console.error('[droly-api] fal.ai : photos de référence ignorées pour ce tour :', extraCount);
+  const data = await falFetch(FAL_QUEUE + model, {
+    method: 'POST', body: JSON.stringify(buildFalBody({ model, kind, variant, image })),
+  }, 45000);
+  let responseUrl = data && typeof data.response_url === 'string' ? data.response_url : '';
+  if (!responseUrl && data && data.request_id) {
+    const app = model.split('/').slice(0, 2).join('/');
+    responseUrl = FAL_QUEUE + app + '/requests/' + encodeURIComponent(data.request_id);
+  }
+  const taskId = FAL_PREFIX + responseUrl;
+  if (!responseUrl || !falResponseUrl(taskId)) throw new Error('Réponse fal.ai sans identifiant de tâche');
+  return taskId;
+}
+
+async function falTaskState(taskId) {
+  const responseUrl = falResponseUrl(taskId);
+  if (!responseUrl) return { state: 'failed', reason: 'Identifiant de tâche fal.ai invalide' };
+  let status;
+  try {
+    status = await falFetch(responseUrl + '/status', { method: 'GET' }, 20000);
+  } catch (err) {
+    if (err.status === 404) return { state: 'failed', reason: 'Tâche fal.ai introuvable' };
+    throw err;
+  }
+  if (!status || status.status !== 'COMPLETED') return { state: 'pending' }; // IN_QUEUE / IN_PROGRESS
+  if (status.error) return { state: 'failed', reason: String(status.error).slice(0, 300) };
+
+  let result;
+  try {
+    result = await falFetch(responseUrl, { method: 'GET' }, 20000);
+  } catch (err) {
+    // La tâche est terminée : une erreur ici veut dire qu'elle a échoué
+    // (sauf surcharge passagère ou coupure réseau, où l'on réessaiera).
+    if (typeof err.status === 'number' && err.status !== 429) return { state: 'failed', reason: err.message };
+    throw err;
+  }
+  const url = result && result.video && result.video.url;
+  return url ? { state: 'succeeded', url } : { state: 'failed', reason: 'Réponse fal.ai sans vidéo' };
+}
+
+// ---------------------------------------------------------------------------
+// BytePlus ModelArk
+// ---------------------------------------------------------------------------
+
 // Prépare la demande envoyée à BytePlus ModelArk.
 export function buildTaskBody({ model, kind, variant, image, extraImages }) {
   const tour = kind === 'tour';
@@ -167,6 +293,7 @@ export async function createVideoTask(rawImage, options = {}) {
   const rawExtras = kind === 'tour' && Array.isArray(options.extraImages) ? options.extraImages : [];
   const [image, ...extraImages] = await Promise.all([rawImage, ...rawExtras].map(inlineRemoteImage));
   const model = videoModel(kind);
+  if (videoProvider() === 'fal') return createFalTask(model, kind, variant, image, extraImages.length);
   const send = (refs) => ark(
     '/contents/generations/tasks',
     { method: 'POST', body: JSON.stringify(buildTaskBody({ model, kind, variant, image, extraImages: refs })) },
@@ -218,7 +345,9 @@ async function claim(id) {
 
 // Où en est une tâche Seedance ? (utilisé par les vidéos des abonnés et par
 // les essais gratuits de la page d'accueil)
+// Renvoie { state: 'succeeded', url } | { state: 'failed', reason } | { state: 'pending' }
 export async function taskState(taskId) {
+  if (String(taskId).startsWith(FAL_PREFIX)) return falTaskState(taskId);
   let task;
   try {
     task = await getVideoTask(taskId);
@@ -289,42 +418,25 @@ async function finalize(generation, videoUrl) {
 // déjà créées ; elle contient l'identifiant de la tâche Seedance.)
 // Renvoie { state: 'succeeded', video } | { state: 'failed', message } | { state: 'pending' }
 export async function advance(generation) {
-  let task;
-  try {
-    task = await getVideoTask(generation.runway_task_id);
-  } catch (err) {
-    if (err.status === 404) {
-      await markFailed(generation.id, 'Tâche Seedance introuvable');
-      return { state: 'failed', message: FAILED_MESSAGE };
-    }
-    throw err;
-  }
+  const result = await taskState(generation.runway_task_id);
+  if (result.state === 'pending') return { state: 'pending' }; // en file d'attente / en cours
 
-  if (task.status === 'succeeded') {
-    const url = task.content && task.content.video_url;
-    if (!url) {
-      await markFailed(generation.id, 'Réponse Seedance sans vidéo');
-      return { state: 'failed', message: FAILED_MESSAGE };
-    }
-    const claimed = await claim(generation.id);
-    if (!claimed) return { state: 'pending' }; // une autre requête s'en occupe déjà
-    try {
-      return { state: 'succeeded', video: await finalize(claimed, url) };
-    } catch (err) {
-      if (err.permanent) {
-        await markFailed(generation.id, err.message);
-        return { state: 'failed', message: FAILED_MESSAGE };
-      }
-      await updateGeneration(generation.id, { status: 'pending' }).catch(() => {});
-      throw err;
-    }
-  }
-
-  if (task.status === 'failed' || task.status === 'cancelled' || task.status === 'expired') {
-    console.error('[droly-api] Seedance a échoué :', task.status, JSON.stringify(task.error || null));
-    await markFailed(generation.id, (task.error && task.error.message) || task.status);
+  if (result.state === 'failed') {
+    console.error('[droly-api] La vidéo a échoué :', result.reason);
+    await markFailed(generation.id, result.reason);
     return { state: 'failed', message: FAILED_MESSAGE };
   }
 
-  return { state: 'pending' }; // queued / running
+  const claimed = await claim(generation.id);
+  if (!claimed) return { state: 'pending' }; // une autre requête s'en occupe déjà
+  try {
+    return { state: 'succeeded', video: await finalize(claimed, result.url) };
+  } catch (err) {
+    if (err.permanent) {
+      await markFailed(generation.id, err.message);
+      return { state: 'failed', message: FAILED_MESSAGE };
+    }
+    await updateGeneration(generation.id, { status: 'pending' }).catch(() => {});
+    throw err;
+  }
 }

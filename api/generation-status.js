@@ -5,7 +5,7 @@
 // Réponses : { video } | { failed: true, message } | { pending: true }
 
 import { configError, fail, getUser, handler, json, supabaseAdmin } from './_shared.js';
-import { advance, FAILED_MESSAGE, markFailed } from './_generation.js';
+import { advance, FAILED_MESSAGE, markFailed, videoKeyName } from './_generation.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const STALE_RESERVATION_MS = 3 * 60 * 1000;
@@ -14,7 +14,7 @@ export default handler('generation-status', async (request) => {
   if (request.method !== 'POST') return fail(405, 'method_not_allowed', 'Méthode non autorisée.');
 
   const missing = configError([
-    'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY', 'SEEDANCE_API_KEY',
+    'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SECRET_KEY', videoKeyName(),
   ]);
   if (missing) return missing;
 

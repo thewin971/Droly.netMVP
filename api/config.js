@@ -6,16 +6,18 @@
 // jamais renvoyée, seulement "true" / "false".
 
 import { env, handler, json, limits } from './_shared.js';
-import { videoModel } from './_generation.js';
+import { videoKeyName, videoModel, videoProvider } from './_generation.js';
 
-const REQUIRED = [
+// La clé vidéo attendue dépend du fournisseur : FAL_KEY (fal.ai) ou
+// SEEDANCE_API_KEY (BytePlus). Une seule des deux suffit.
+const required = () => [
   'SUPABASE_URL',
   'SUPABASE_PUBLISHABLE_KEY',
   'SUPABASE_SECRET_KEY',
   'STRIPE_SECRET_KEY',
   'STRIPE_PRICE_ID',
   'STRIPE_WEBHOOK_SECRET',
-  'SEEDANCE_API_KEY',
+  videoKeyName(),
 ];
 
 function warnings() {
@@ -52,6 +54,7 @@ function warnings() {
 }
 
 export default handler('config', async () => {
+  const REQUIRED = required();
   const checks = {};
   for (const name of REQUIRED) checks[name] = !!env(name);
   const sk = env('STRIPE_SECRET_KEY');
@@ -62,6 +65,7 @@ export default handler('config', async () => {
     ready: REQUIRED.every((name) => checks[name]) && warnings().length === 0,
     stripeMode: sk ? (/_live_/.test(sk) ? 'live' : 'test') : null,
     limits: limits(),
+    videoProvider: videoProvider(),
     videoModel: videoModel('travelling'),
     tourModel: videoModel('tour'),
     checks,
