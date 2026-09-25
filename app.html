@@ -149,6 +149,18 @@ p{line-height:1.6;}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,0.65);color:#fff;font-size:0.9375rem;line-height:1;cursor:pointer;}
 .thumb button.plus{top:auto;bottom:4px;background:var(--accent);color:#fff;}
+.thumb button.move{top:auto;bottom:4px;right:auto;left:4px;}
+.thumb .order{position:absolute;top:4px;left:4px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.player.tall{aspect-ratio:9/16;width:min(100%, calc(70vh * 9 / 16));margin-left:auto;margin-right:auto;}
+.logo-box{margin:0 0 16px;padding:14px 16px;border:1px solid var(--line-strong);border-radius:var(--radius-m);background:var(--bg);}
+.logo-box .logo-head{font-size:0.75rem;color:var(--ink-mute);margin:0 0 10px;}
+.logo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.logo-prev{width:88px;height:52px;border-radius:8px;border:1px solid var(--line);background:repeating-conic-gradient(#2a261d 0% 25%, #201c14 0% 50%) 50% / 14px 14px;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;}
+.logo-prev img{max-width:100%;max-height:100%;display:block;}
+.logo-use{display:flex;align-items:center;gap:8px;font-size:0.875rem;cursor:pointer;flex:1;min-width:180px;}
+.logo-use input{width:18px;height:18px;accent-color:var(--accent);margin:0;flex:none;}
+.file-btn{position:relative;overflow:hidden;padding:9px 16px;font-size:0.8125rem;}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 
 .progress{display:flex;gap:16px;align-items:flex-start;}
 .progress .timer{font-variant-numeric:tabular-nums;color:var(--ink-mute);font-size:0.8125rem;margin-top:4px;}
@@ -347,13 +359,29 @@ p{line-height:1.6;}
         <form id="genForm" novalidate>
           <fieldset class="kinds" id="kindPicker">
             <legend>Type de vidéo</legend>
-            <label class="kind on"><input type="radio" name="videoKind" value="travelling" checked><span><strong>Plan drone</strong><small>La caméra avance doucement vers le bien ou dans la pièce · 5 s</small></span></label>
+            <label class="kind on"><input type="radio" name="videoKind" value="travelling" checked><span><strong>Plan drone</strong><small>Un vrai mouvement de drone : la caméra avance et s’élève vers le bien ou dans la pièce · 5 s</small></span></label>
             <label class="kind"><input type="radio" name="videoKind" value="tour"><span><strong>Tour à 360°</strong><small>La caméra fait le tour complet et revient à son point de départ · 10 s</small></span></label>
+            <label class="kind"><input type="radio" name="videoKind" value="visit"><span><strong>Visite complète</strong><small>2 à 6 photos du bien (façade, salon, cuisine…) enchaînées en une seule vidéo · 10 à 30 s</small></span></label>
           </fieldset>
           <div class="subchoice" id="variantPicker" hidden>
             <span class="subchoice-label">Le tour se fait :</span>
             <label class="pill on"><input type="radio" name="tourVariant" value="exterior" checked><span>autour de la maison</span></label>
             <label class="pill"><input type="radio" name="tourVariant" value="interior"><span>dans une pièce</span></label>
+          </div>
+          <div class="subchoice" id="formatPicker">
+            <span class="subchoice-label">Format de la vidéo :</span>
+            <label class="pill on"><input type="radio" name="videoFormat" value="landscape" checked><span>Paysage 16:9</span></label>
+            <label class="pill"><input type="radio" name="videoFormat" value="vertical"><span>Vertical 9:16 · Reels, TikTok</span></label>
+          </div>
+          <div class="field" id="visitField" hidden>
+            <label for="visitInput">Photos de la visite, dans l’ordre (2 à 6)</label>
+            <label class="drop drop-sm" id="visitDrop">
+              <input type="file" id="visitInput" accept="image/jpeg,image/png,image/webp,image/*" multiple>
+              <strong id="visitTitle">Ajouter des photos</strong>
+              <span class="muted small">Par exemple : façade, salon, cuisine, chambre, piscine. Chaque photo devient un plan de 5 s.</span>
+            </label>
+            <div class="thumbs" id="visitThumbs"></div>
+            <p class="hint">Les pièces s’enchaînent dans l’ordre des numéros, avec un fondu entre chacune. La flèche ← avance une photo d’un rang.</p>
           </div>
           <label class="drop" id="drop">
             <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/*">
@@ -362,7 +390,7 @@ p{line-height:1.6;}
             <span class="muted small" id="dropSub">Depuis votre téléphone ou votre ordinateur (JPEG, PNG, WebP)</span>
           </label>
           <p class="hint" id="photoHint" style="margin:8px 0 0;">Une pièce bien éclairée, au format paysage.</p>
-          <div class="or">ou</div>
+          <div class="or" id="orSep">ou</div>
           <div class="field">
             <label for="photoUrl">Lien de l’annonce, ou d’une photo</label>
             <input type="url" id="photoUrl" inputmode="url" placeholder="https://www.airbnb.fr/rooms/…" autocomplete="off">
@@ -379,6 +407,16 @@ p{line-height:1.6;}
             </label>
             <div class="thumbs" id="extraThumbs"></div>
             <p class="hint">Pendant le tour, la caméra montre aussi ce qui n’apparaît sur aucune photo : l’IA l’imagine. Plus vous ajoutez de photos du même lieu, plus le résultat est fidèle.</p>
+          </div>
+          <div class="logo-box" id="logoBox">
+            <p class="logo-head">Logo de votre agence (facultatif)</p>
+            <div class="logo-row">
+              <div class="logo-prev" id="logoPrev" hidden><img id="logoImg" alt="Votre logo"></div>
+              <label class="logo-use" id="logoUse" hidden><input type="checkbox" id="logoCheck" checked><span>Incruster mon logo en bas à droite</span></label>
+              <label class="btn btn-ghost file-btn"><input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp"><span id="logoBtnText">Ajouter un logo</span></label>
+              <button type="button" class="linkbtn" id="logoRemove" hidden>Retirer</button>
+            </div>
+            <p class="hint" id="logoHint">Un PNG à fond transparent donne le meilleur résultat. Il est gardé pour vos prochaines vidéos.</p>
           </div>
           <div class="field">
             <label for="videoTitle">Nom de la vidéo (facultatif)</label>
@@ -609,11 +647,14 @@ async function accessToken(){
   var got = await supabase.auth.getSession();
   return got.data.session ? got.data.session.access_token : null;
 }
-async function api(path, body){
+async function api(path, body, method){
   var token = await accessToken();
   var headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = 'Bearer ' + token;
-  var res = await fetch(path, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) });
+  method = method || 'POST';
+  var init = { method: method, headers: headers };
+  if (method === 'POST') init.body = JSON.stringify(body || {});
+  var res = await fetch(path, init);
   var data = null;
   try { data = await res.json(); } catch (e) {}
   if (!res.ok){
@@ -847,6 +888,7 @@ function openDashboard(tab, message){
   loadVideos().catch(function(){});
   refreshQuota().catch(function(){});
   resumePending().catch(function(){});
+  loadLogo().catch(function(){});
 }
 
 function selectTab(name){
@@ -918,6 +960,10 @@ var pickedUrl = null;       // photo choisie dans les photos de l'annonce
 var listingPhotos = [];     // photos trouvées sur la page de l'annonce
 var extraImages = [];       // photos supplémentaires préparées (tours à 360°)
 var MAX_EXTRA = 3;
+var visitImages = [];       // photos de la visite complète, dans l'ordre
+var MIN_VISIT = 2, MAX_VISIT = 6;
+var VISIT_MAX_LENGTH = 600000; // 6 photos restent sous la limite d'envoi du serveur
+var logoUrl = null;         // aperçu du logo de l'agence (null = pas de logo)
 // Poids maximum de chaque photo envoyée : l'ensemble reste sous la limite
 // d'envoi du serveur (4,5 Mo), même avec 3 photos supplémentaires.
 var MAIN_MAX_LENGTH = 2000000;
@@ -1008,19 +1054,140 @@ var PHOTO_HINTS = {
 };
 function currentKind(){
   var el = document.querySelector('input[name="videoKind"]:checked');
-  var kind = el && el.value === 'tour' ? 'tour' : 'travelling';
+  var kind = el && (el.value === 'tour' || el.value === 'visit') ? el.value : 'travelling';
   var v = document.querySelector('input[name="tourVariant"]:checked');
-  return { kind: kind, variant: v && v.value === 'interior' ? 'interior' : 'exterior' };
+  var f = document.querySelector('input[name="videoFormat"]:checked');
+  return {
+    kind: kind,
+    variant: v && v.value === 'interior' ? 'interior' : 'exterior',
+    format: f && f.value === 'vertical' ? 'vertical' : 'landscape'
+  };
 }
 function applyKind(){
   var k = currentKind();
-  document.querySelectorAll('#kindPicker .kind, #variantPicker .pill').forEach(function(l){ l.classList.toggle('on', l.querySelector('input').checked); });
+  var visit = k.kind === 'visit';
+  document.querySelectorAll('#kindPicker .kind, #variantPicker .pill, #formatPicker .pill').forEach(function(l){ l.classList.toggle('on', l.querySelector('input').checked); });
   $('#variantPicker').hidden = k.kind !== 'tour';
   $('#extraField').hidden = k.kind !== 'tour';
+  $('#visitField').hidden = !visit;
+  $('#drop').hidden = visit;
+  $('#photoHint').hidden = visit;
+  $('#orSep').hidden = visit;
   $('#photoHint').textContent = PHOTO_HINTS[k.kind === 'tour' ? k.variant : 'travelling'];
-  $('#genSubmit').textContent = k.kind === 'tour' ? 'Générer le tour à 360°' : 'Générer la vidéo';
+  $('#genSubmit').textContent = k.kind === 'tour' ? 'Générer le tour à 360°'
+    : visit ? 'Générer la visite complète' : 'Générer la vidéo';
+  if (listingPhotos.length) renderListingPhotos();
 }
-document.querySelectorAll('input[name="videoKind"], input[name="tourVariant"]').forEach(function(r){ r.addEventListener('change', applyKind); });
+document.querySelectorAll('input[name="videoKind"], input[name="tourVariant"], input[name="videoFormat"]').forEach(function(r){ r.addEventListener('change', applyKind); });
+
+// Visite complète : photos dans l'ordre, 2 à 6.
+function renderVisit(){
+  var box = $('#visitThumbs');
+  box.textContent = '';
+  visitImages.forEach(function(data, i){
+    var t = document.createElement('div'); t.className = 'thumb';
+    var img = document.createElement('img'); img.src = data; img.alt = 'Photo ' + (i + 1) + ' de la visite';
+    var n = document.createElement('span'); n.className = 'order'; n.textContent = String(i + 1);
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = '×';
+    b.setAttribute('aria-label', 'Retirer la photo ' + (i + 1) + ' de la visite');
+    b.addEventListener('click', function(){ visitImages.splice(i, 1); renderVisit(); });
+    t.appendChild(img); t.appendChild(n); t.appendChild(b);
+    if (i > 0){
+      var m = document.createElement('button'); m.type = 'button'; m.className = 'move'; m.textContent = '←';
+      m.setAttribute('aria-label', 'Avancer la photo ' + (i + 1) + ' d’un rang');
+      m.addEventListener('click', function(){
+        var tmp = visitImages[i - 1]; visitImages[i - 1] = visitImages[i]; visitImages[i] = tmp; renderVisit();
+      });
+      t.appendChild(m);
+    }
+    box.appendChild(t);
+  });
+  $('#visitTitle').textContent = visitImages.length >= MAX_VISIT ? '6 photos ajoutées (maximum)'
+    : (visitImages.length ? 'Ajouter une autre photo (' + visitImages.length + '/6)' : 'Ajouter des photos');
+}
+
+$('#visitInput').addEventListener('change', async function(){
+  var files = Array.prototype.slice.call(this.files || []);
+  this.value = '';
+  notice('#genMsg', null, '');
+  if (!files.length) return;
+  var room = MAX_VISIT - visitImages.length;
+  if (files.length > room){
+    notice('#genMsg', 'error', room > 0
+      ? 'Vous pouvez encore ajouter ' + plural(room, 'photo', 'photos') + ' : les autres ont été ignorées.'
+      : '6 photos au maximum. Retirez-en une pour en ajouter une autre.');
+  }
+  $('#visitTitle').textContent = 'Préparation…';
+  for (var i = 0; i < files.length && visitImages.length < MAX_VISIT; i++){
+    try { visitImages.push(await prepareImage(files[i], VISIT_MAX_LENGTH)); }
+    catch (err) { notice('#genMsg', 'error', err.message); }
+  }
+  renderVisit();
+});
+
+// Logo de l'agence : enregistré une fois, proposé sur chaque vidéo.
+function renderLogo(){
+  var has = !!logoUrl;
+  $('#logoPrev').hidden = !has;
+  $('#logoUse').hidden = !has;
+  $('#logoRemove').hidden = !has;
+  if (has) $('#logoImg').src = logoUrl;
+  $('#logoBtnText').textContent = has ? 'Changer' : 'Ajouter un logo';
+}
+async function loadLogo(){
+  var r = await api('/api/logo', null, 'GET');
+  logoUrl = r.logo && r.logo.url ? r.logo.url : null;
+  renderLogo();
+}
+// Le logo est converti en PNG (transparence gardée), 800 px au plus.
+function prepareLogo(file){
+  return new Promise(function(resolve, reject){
+    if (!file.type || !/^image\/(png|jpeg|webp)$/.test(file.type)) return reject(new Error('Utilisez une image PNG, JPEG ou WebP pour votre logo.'));
+    var objectUrl = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var scale = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) { reject(e); }
+      finally { URL.revokeObjectURL(objectUrl); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(objectUrl); reject(new Error('Impossible de lire ce logo.')); };
+    img.src = objectUrl;
+  });
+}
+$('#logoInput').addEventListener('change', async function(){
+  var file = this.files && this.files[0];
+  this.value = '';
+  notice('#genMsg', null, '');
+  if (!file) return;
+  $('#logoBtnText').textContent = 'Envoi…';
+  try {
+    var r = await api('/api/logo', { image: await prepareLogo(file) });
+    logoUrl = r.logo && r.logo.url ? r.logo.url : null;
+    $('#logoCheck').checked = true;
+    notice('#genMsg', 'success', 'Logo enregistré : il sera incrusté en bas à droite de vos vidéos.');
+  } catch (err) {
+    notice('#genMsg', 'error', err.message);
+  }
+  renderLogo();
+});
+$('#logoRemove').addEventListener('click', async function(){
+  setBusy(this, true, 'Retrait…');
+  try {
+    await api('/api/logo', null, 'DELETE');
+    logoUrl = null;
+    renderLogo();
+  } catch (err) {
+    notice('#genMsg', 'error', err.message);
+  } finally {
+    setBusy(this, false);
+  }
+});
 
 function renderExtras(){
   var box = $('#extraThumbs');
@@ -1103,9 +1270,15 @@ function renderListingPhotos(reason){
     var t = document.createElement('div'); t.className = 'thumb';
     var img = document.createElement('img'); img.src = url; img.alt = 'Photo ' + (i + 1) + ' de l’annonce';
     img.addEventListener('error', function(){ t.remove(); });
-    var b = document.createElement('button'); b.type = 'button'; b.textContent = '✓';
-    b.setAttribute('aria-label', 'Utiliser la photo ' + (i + 1));
-    b.addEventListener('click', function(){ usePhoto(url); });
+    var forVisit = currentKind().kind === 'visit';
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = forVisit ? '+' : '✓';
+    b.setAttribute('aria-label', forVisit ? 'Ajouter la photo ' + (i + 1) + ' à la visite' : 'Utiliser la photo ' + (i + 1));
+    b.addEventListener('click', function(){
+      if (!forVisit) return usePhoto(url);
+      if (visitImages.length >= MAX_VISIT) return notice('#genMsg', 'error', '6 photos au maximum pour une visite.');
+      if (visitImages.indexOf(url) === -1) visitImages.push(url);
+      renderVisit();
+    });
     t.appendChild(img); t.appendChild(b);
     if (currentKind().kind === 'tour'){
       var plus = document.createElement('button');
@@ -1142,7 +1315,9 @@ window.addEventListener('beforeunload', function(e){
 function showProgress(startedAt, kind){
   $('#genWaitText').textContent = kind === 'tour'
     ? 'Un tour à 360° prend en général 2 à 5 minutes. Laissez cette page ouverte.'
-    : 'En général 1 à 3 minutes. Laissez cette page ouverte.';
+    : kind === 'visit'
+      ? 'Une visite complète prend en général 3 à 6 minutes (un plan par photo, puis le montage). Laissez cette page ouverte.'
+      : 'En général 1 à 3 minutes. Laissez cette page ouverte.';
   $('#genFormCard').hidden = true;
   $('#genResult').hidden = true;
   $('#genProgress').hidden = false;
@@ -1185,10 +1360,16 @@ async function finishWithVideo(video){
 $('#genForm').addEventListener('submit', async function(e){
   e.preventDefault();
   if (generating) return;
+  var k = currentKind();
   var link = $('#photoUrl').value.trim();
   var image = preparedImage || pickedUrl || link;
-  if (!image) return notice('#genMsg', 'error', 'Ajoutez une photo, ou collez le lien de votre annonce.');
-  if (!preparedImage && !pickedUrl){
+  if (k.kind === 'visit'){
+    if (visitImages.length < MIN_VISIT){
+      return notice('#genMsg', 'error', 'Ajoutez au moins 2 photos pour une visite complète (vous en avez ' + visitImages.length + ').');
+    }
+  } else if (!image) {
+    return notice('#genMsg', 'error', 'Ajoutez une photo, ou collez le lien de votre annonce.');
+  } else if (!preparedImage && !pickedUrl){
     var u;
     try { u = new URL(link); } catch (err) { return notice('#genMsg', 'error', 'Ce lien n’est pas valide.'); }
     if (u.protocol !== 'https:') return notice('#genMsg', 'error', 'Le lien doit commencer par https://');
@@ -1197,8 +1378,10 @@ $('#genForm').addEventListener('submit', async function(e){
     }
   }
 
-  var k = currentKind();
-  var payload = { image: image, title: $('#videoTitle').value.trim(), kind: k.kind };
+  var payload = { title: $('#videoTitle').value.trim(), kind: k.kind, format: k.format };
+  if (k.kind === 'visit') payload.images = visitImages.slice();
+  else payload.image = image;
+  if (logoUrl && $('#logoCheck').checked) payload.logo = true;
   if (k.kind === 'tour'){
     payload.variant = k.variant;
     if (extraImages.length) payload.extraImages = extraImages.slice();
@@ -1218,8 +1401,13 @@ $('#genForm').addEventListener('submit', async function(e){
     if (keepKind) keepKind.checked = true;
     var keepVariant = document.querySelector('input[name="tourVariant"][value="' + k.variant + '"]');
     if (keepVariant) keepVariant.checked = true;
+    var keepFormat = document.querySelector('input[name="videoFormat"][value="' + k.format + '"]');
+    if (keepFormat) keepFormat.checked = true;
+    if (logoUrl) $('#logoCheck').checked = !!payload.logo;
     resetDrop();
     extraImages = [];
+    visitImages = [];
+    renderVisit();
     listingPhotos = [];
     $('#listingPhotos').textContent = '';
     renderExtras();
@@ -1291,11 +1479,15 @@ async function refreshQuota(){
   var dayStart = Date.now() - 24 * 60 * 60 * 1000;
   var today = rows.filter(function(g){ return Date.parse(g.created_at) > dayStart; }).length;
   var tours = rows.filter(function(g){ return g.kind === 'tour'; }).length;
+  var visits = rows.filter(function(g){ return g.kind === 'visit'; }).length;
   var parts = [];
   if (lim.perMonth){
     var left = Math.max(0, lim.perMonth - rows.length);
     var line = 'Il vous reste ' + plural(left, 'vidéo', 'vidéos') + ' sur 30 jours';
-    if (lim.toursPerMonth) line += ' (dont ' + plural(Math.min(left, Math.max(0, lim.toursPerMonth - tours)), 'tour', 'tours') + ' à 360°)';
+    var dont = [];
+    if (lim.toursPerMonth) dont.push(plural(Math.min(left, Math.max(0, lim.toursPerMonth - tours)), 'tour', 'tours') + ' à 360°');
+    if (lim.visitsPerMonth) dont.push(plural(Math.min(left, Math.max(0, lim.visitsPerMonth - visits)), 'visite complète', 'visites complètes'));
+    if (dont.length) line += ' (dont ' + dont.join(' et ') + ')';
     parts.push(line);
   } else if (lim.toursPerMonth){
     parts.push('Il vous reste ' + plural(Math.max(0, lim.toursPerMonth - tours), 'tour', 'tours') + ' à 360° sur 30 jours');
@@ -1313,12 +1505,21 @@ async function signedUrl(path, seconds, downloadName){
 }
 
 async function showResult(video){
-  $('#resultEyebrow').textContent = video.kind === 'tour' ? 'Tour à 360° prêt' : 'Vidéo prête';
+  $('#resultEyebrow').textContent = video.kind === 'tour' ? 'Tour à 360° prêt'
+    : video.kind === 'visit' ? 'Visite complète prête' : 'Vidéo prête';
   $('#resultTitle').textContent = video.title;
   $('#resultVideo').src = await signedUrl(video.storage_path, 3600);
   $('#genFormCard').hidden = true;
   $('#genResult').hidden = false;
 }
+
+// Vidéo verticale (9:16) : le lecteur prend sa forme au lieu d'afficher des bandes noires.
+function fitPlayer(vid){
+  vid.addEventListener('loadedmetadata', function(){
+    if (vid.parentNode) vid.parentNode.classList.toggle('tall', vid.videoHeight > vid.videoWidth);
+  });
+}
+fitPlayer($('#resultVideo'));
 
 function fileName(title){
   var base = String(title || 'video').normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -1399,6 +1600,7 @@ function videoCard(video, url){
   vid.controls = true; vid.playsInline = true; vid.preload = 'metadata';
   vid.setAttribute('playsinline', '');
   if (url) vid.src = url;
+  fitPlayer(vid);
   player.appendChild(vid);
 
   var meta = document.createElement('div');
@@ -1406,9 +1608,10 @@ function videoCard(video, url){
   var head = document.createElement('div');
   var t = document.createElement('div'); t.className = 't'; t.textContent = video.title || 'Vidéo';
   var d = document.createElement('div'); d.className = 'd'; d.textContent = formatDate(video.created_at);
-  if (video.kind === 'tour'){
+  var KIND_TAGS = { tour: 'Tour 360°', visit: 'Visite complète' };
+  if (KIND_TAGS[video.kind]){
     var tag = document.createElement('span');
-    tag.className = 'badge'; tag.style.marginLeft = '8px'; tag.textContent = 'Tour 360°';
+    tag.className = 'badge'; tag.style.marginLeft = '8px'; tag.textContent = KIND_TAGS[video.kind];
     d.appendChild(tag);
   }
   head.appendChild(t); head.appendChild(d);

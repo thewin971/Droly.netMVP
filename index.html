@@ -265,8 +265,10 @@ section[id]{scroll-margin-top:90px;}
 .quote-card .who{font-size:0.8125rem;color:var(--ink-mute);}
 
 /* DEUX FORMATS */
-.formats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.formats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+@media (max-width:980px){ .formats-grid{grid-template-columns:1fr 1fr;} }
 @media (max-width:760px){ .formats-grid{grid-template-columns:1fr;} }
+.formats-extra{margin:28px auto 0;max-width:720px;text-align:center;color:var(--ink-dim);}
 .format-card{border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;background:var(--bg-elev);display:flex;flex-direction:column;}
 .format-media{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000;}
 .format-media video{width:100%;height:100%;object-fit:cover;display:block;}
@@ -419,7 +421,7 @@ section[id]{scroll-margin-top:90px;}
   <section class="formats border-top" id="formats">
     <div class="wrap">
       <div class="section-head reveal">
-        <h2>Deux formats, à partir des mêmes photos</h2>
+        <h2>Trois formats, à partir des mêmes photos</h2>
         <p>Vous choisissez le mouvement de caméra au moment de créer la vidéo.</p>
       </div>
       <div class="formats-grid reveal-stagger">
@@ -428,7 +430,7 @@ section[id]{scroll-margin-top:90px;}
           <div class="format-body">
             <span class="tag">Plan drone · 5 s</span>
             <h3>La caméra s’approche</h3>
-            <p>Un mouvement lent et régulier vers le bien ou dans la pièce, comme un drone qui s’avance. C’est le format à utiliser pour la plupart des annonces.</p>
+            <p>La caméra avance et s’élève vers le bien ou dans la pièce, comme un drone. C’est le format à utiliser pour la plupart des annonces.</p>
           </div>
         </article>
         <article class="format-card">
@@ -442,7 +444,16 @@ section[id]{scroll-margin-top:90px;}
             <p>Un tour complet autour de la maison, ou sur elle-même au milieu d’une pièce, qui revient à son point de départ. Ajoutez d’autres photos du même endroit : le tour sera plus fidèle.</p>
           </div>
         </article>
+        <article class="format-card">
+          <div class="format-media"><video autoplay muted loop playsinline preload="auto"><source src="videos/salon.mp4" type="video/mp4"></video></div>
+          <div class="format-body">
+            <span class="tag">Visite complète · 10 à 30 s</span>
+            <h3>Toute l’annonce en une vidéo</h3>
+            <p>Façade, salon, cuisine, chambres, piscine : jusqu’à 6 photos enchaînées dans l’ordre de votre choix, avec un fondu entre chaque pièce.</p>
+          </div>
+        </article>
       </div>
+      <p class="formats-extra reveal">Chaque format existe en <strong>paysage</strong> pour vos annonces et en <strong>vertical 9:16</strong> pour Instagram Reels et TikTok, avec le <strong>logo de votre agence</strong> incrusté si vous le souhaitez.</p>
     </div>
   </section>
 

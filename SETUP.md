@@ -234,6 +234,7 @@ Facultatif :
 | `MAX_VIDEOS_PER_DAY` | vidéos maximum par client sur 24 h (défaut : **10**, `0` = sans limite) |
 | `SEEDANCE_MODEL` | modèle des vidéos « Plan drone » (défaut : `seedance-1-0-pro-fast-251015`). Voir étape 3bis. |
 | `SEEDANCE_TOUR_MODEL` | modèle des tours à 360° (défaut : `dreamina-seedance-2-0-mini-260615`). Voir étape 3bis. |
+| `MAX_VISITS_PER_MONTH` | visites complètes par client sur 30 jours (défaut : 5). Chaque visite fabrique un plan par photo (2 à 6), puis les monte en une vidéo. |
 | `SITE_URL` | seulement si tu utilises un nom de domaine personnalisé, ex. `https://droly.fr` |
 
 **Puis redéploie** (les réglages ne s'appliquent qu'au déploiement suivant) :

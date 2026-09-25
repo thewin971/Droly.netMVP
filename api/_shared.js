@@ -78,6 +78,7 @@ export function limits() {
     perDay: intEnv('MAX_VIDEOS_PER_DAY', 10),
     perMonth: intEnv('MAX_VIDEOS_PER_MONTH', 30),
     toursPerMonth: intEnv('MAX_TOURS_PER_MONTH', 5),
+    visitsPerMonth: intEnv('MAX_VISITS_PER_MONTH', 5),
     freeTrialsPerDay: intEnv('FREE_TRIALS_PER_DAY', 20),
   };
 }

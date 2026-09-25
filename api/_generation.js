@@ -16,6 +16,7 @@
 // dans "Mes vidéos" dès qu'elle est prête.
 
 import { env, supabaseAdmin } from './_shared.js';
+import { editVideo } from './_video.js';
 
 // Deux types de vidéo :
 //  - "travelling" (« Plan drone » côté client) : la caméra avance doucement
@@ -57,6 +58,18 @@ export function videoKeyName() {
 
 export const DURATIONS = { travelling: 5, tour: 10 };
 export const MAX_EXTRA_IMAGES = 3;
+
+// Visite complète : une vidéo « plan drone » par photo, puis montage en une
+// seule vidéo (voir _video.js). Entre 2 et 6 photos.
+export const VISIT_MIN_IMAGES = 2;
+export const VISIT_MAX_IMAGES = 6;
+
+// Formats : paysage (16:9, par défaut) ou vertical (9:16 : Reels, TikTok, stories).
+export const RATIOS = { landscape: '16:9', vertical: '9:16' };
+export const cleanFormat = (format) => (format === 'vertical' ? 'vertical' : 'landscape');
+
+// Logo de l'agence : un seul fichier par client, dans son dossier du stockage.
+export const logoPath = (userId) => `${userId}/logo`;
 
 // Consignes envoyées au modèle (en anglais : les modèles les suivent mieux).
 // Plan drone : un vrai mouvement de caméra bien visible (et pas un simple
@@ -180,13 +193,13 @@ async function falFetch(url, init, timeoutMs) {
 }
 
 // Prépare la demande envoyée à fal.ai.
-export function buildFalBody({ model, kind, variant, image }) {
+export function buildFalBody({ model, kind, variant, image, format }) {
   const tour = kind === 'tour';
   const body = {
     prompt: tour ? TOUR_PROMPTS[variant] || TOUR_PROMPTS.exterior : DEFAULT_PROMPT,
     image_url: image,
     resolution: '720p',
-    aspect_ratio: '16:9',
+    aspect_ratio: RATIOS[cleanFormat(format)],
     duration: String(tour ? DURATIONS.tour : DURATIONS.travelling),
     enable_safety_checker: true,
   };
@@ -204,10 +217,10 @@ function falResponseUrl(taskId) {
   return url.startsWith(FAL_QUEUE) && !/[\s?#]/.test(url) ? url.replace(/\/+$/, '') : null;
 }
 
-async function createFalTask(model, kind, variant, image, extraCount) {
+async function createFalTask(model, kind, variant, image, extraCount, format) {
   if (extraCount) console.error('[droly-api] fal.ai : photos de référence ignorées pour ce tour :', extraCount);
   const data = await falFetch(FAL_QUEUE + model, {
-    method: 'POST', body: JSON.stringify(buildFalBody({ model, kind, variant, image })),
+    method: 'POST', body: JSON.stringify(buildFalBody({ model, kind, variant, image, format })),
   }, 45000);
   let responseUrl = data && typeof data.response_url === 'string' ? data.response_url : '';
   if (!responseUrl && data && data.request_id) {
@@ -250,8 +263,9 @@ async function falTaskState(taskId) {
 // ---------------------------------------------------------------------------
 
 // Prépare la demande envoyée à BytePlus ModelArk.
-export function buildTaskBody({ model, kind, variant, image, extraImages }) {
+export function buildTaskBody({ model, kind, variant, image, extraImages, format }) {
   const tour = kind === 'tour';
+  const ratio = RATIOS[cleanFormat(format)];
   const legacy = isLegacy(model);
   const duration = tour ? DURATIONS.tour : DURATIONS.travelling;
   const refs = tour && !legacy ? (extraImages || []) : [];
@@ -267,7 +281,7 @@ export function buildTaskBody({ model, kind, variant, image, extraImages }) {
     return {
       model,
       content: [
-        { type: 'text', text: text + ' --resolution 720p --ratio 16:9 --duration ' + duration + ' --watermark false' },
+        { type: 'text', text: text + ' --resolution 720p --ratio ' + ratio + ' --duration ' + duration + ' --watermark false' },
         ...frames,
       ],
     };
@@ -281,7 +295,7 @@ export function buildTaskBody({ model, kind, variant, image, extraImages }) {
       ...refs.map((url) => ({ type: 'image_url', image_url: { url }, role: 'reference_image' })),
     ],
     resolution: '720p',
-    ratio: '16:9',
+    ratio,
     duration,
     watermark: false,
     generate_audio: false,
@@ -289,18 +303,20 @@ export function buildTaskBody({ model, kind, variant, image, extraImages }) {
 }
 
 // Lance une vidéo (720p, sans filigrane ni son) à partir d'une photo.
-// options : { kind: 'travelling' | 'tour', variant: 'exterior' | 'interior', extraImages: [] }
+// options : { kind: 'travelling' | 'tour', variant: 'exterior' | 'interior',
+//             extraImages: [], format: 'landscape' | 'vertical' }
 // Renvoie l'identifiant de la tâche.
 export async function createVideoTask(rawImage, options = {}) {
   const kind = options.kind === 'tour' ? 'tour' : 'travelling';
   const variant = options.variant === 'interior' ? 'interior' : 'exterior';
+  const format = cleanFormat(options.format);
   const rawExtras = kind === 'tour' && Array.isArray(options.extraImages) ? options.extraImages : [];
   const [image, ...extraImages] = await Promise.all([rawImage, ...rawExtras].map(inlineRemoteImage));
   const model = videoModel(kind);
-  if (videoProvider() === 'fal') return createFalTask(model, kind, variant, image, extraImages.length);
+  if (videoProvider() === 'fal') return createFalTask(model, kind, variant, image, extraImages.length, format);
   const send = (refs) => ark(
     '/contents/generations/tasks',
-    { method: 'POST', body: JSON.stringify(buildTaskBody({ model, kind, variant, image, extraImages: refs })) },
+    { method: 'POST', body: JSON.stringify(buildTaskBody({ model, kind, variant, image, extraImages: refs, format })) },
     45000
   );
 
@@ -319,6 +335,39 @@ export async function createVideoTask(rawImage, options = {}) {
   }
   if (!data || !data.id) throw new Error('Réponse Seedance sans identifiant de tâche');
   return data.id;
+}
+
+// Visite complète : un plan drone par photo, lancés tous en même temps.
+// Une photo refusée est simplement sautée ; si toutes le sont, l'erreur de la
+// première remonte (même traitement qu'une vidéo simple).
+// Renvoie un identifiant groupé : "multi:" + la liste des tâches, dans l'ordre.
+const MULTI_PREFIX = 'multi:';
+
+export async function createVisitTasks(images, options = {}) {
+  const format = cleanFormat(options.format);
+  const results = await Promise.allSettled(
+    images.map((image) => createVideoTask(image, { kind: 'travelling', format }))
+  );
+  const ids = [];
+  let firstError = null;
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') ids.push(r.value);
+    else {
+      firstError = firstError || r.reason;
+      console.error('[droly-api] Visite : photo ' + (i + 1) + ' refusée :', r.reason && r.reason.message);
+    }
+  });
+  if (!ids.length) throw firstError || new Error('Aucune vidéo lancée');
+  return MULTI_PREFIX + JSON.stringify(ids);
+}
+
+function multiIds(taskId) {
+  try {
+    const ids = JSON.parse(String(taskId).slice(MULTI_PREFIX.length));
+    return Array.isArray(ids) && ids.length && ids.every((id) => typeof id === 'string') ? ids : null;
+  } catch {
+    return null;
+  }
 }
 
 async function getVideoTask(id) {
@@ -351,6 +400,18 @@ async function claim(id) {
 // les essais gratuits de la page d'accueil)
 // Renvoie { state: 'succeeded', url } | { state: 'failed', reason } | { state: 'pending' }
 export async function taskState(taskId) {
+  if (String(taskId).startsWith(MULTI_PREFIX)) {
+    // Visite complète : prête quand tous les plans sont terminés ; les plans
+    // ratés sont laissés de côté, la visite n'échoue que s'ils ratent tous.
+    const ids = multiIds(taskId);
+    if (!ids) return { state: 'failed', reason: 'Identifiant de visite invalide' };
+    const states = await Promise.all(ids.map((id) => taskState(id)));
+    if (states.some((st) => st.state === 'pending')) return { state: 'pending' };
+    const urls = states.filter((st) => st.state === 'succeeded').map((st) => st.url);
+    if (!urls.length) return { state: 'failed', reason: states[0].reason || 'Tous les plans ont échoué' };
+    if (urls.length < ids.length) console.error('[droly-api] Visite : ' + (ids.length - urls.length) + ' plan(s) raté(s), montage avec les autres');
+    return { state: 'succeeded', url: urls[0], urls };
+  }
   if (String(taskId).startsWith(FAL_PREFIX)) return falTaskState(taskId);
   let task;
   try {
@@ -369,19 +430,53 @@ export async function taskState(taskId) {
   return { state: 'pending' };
 }
 
-// Télécharge la vidéo finie et la range dans le stockage privé.
-export async function storeVideo(storagePath, videoUrl) {
+async function downloadVideo(videoUrl) {
   const download = await fetch(videoUrl, { signal: AbortSignal.timeout(25000) });
   if (!download.ok) {
     const err = new Error('Téléchargement de la vidéo impossible (' + download.status + ')');
     err.permanent = [403, 404, 410].includes(download.status); // lien expiré
     throw err;
   }
-  const bytes = new Uint8Array(await download.arrayBuffer());
+  return new Uint8Array(await download.arrayBuffer());
+}
+
+async function uploadVideo(storagePath, bytes) {
   const upload = await supabaseAdmin().storage
     .from('videos')
     .upload(storagePath, bytes, { contentType: 'video/mp4', upsert: true });
   if (upload.error) throw new Error('Enregistrement du fichier impossible : ' + upload.error.message);
+}
+
+// Télécharge la vidéo finie et la range dans le stockage privé.
+export async function storeVideo(storagePath, videoUrl) {
+  await uploadVideo(storagePath, await downloadVideo(videoUrl));
+}
+
+// Logo du client (octets), ou null s'il n'en a pas.
+export async function loadLogo(userId) {
+  const { data, error } = await supabaseAdmin().storage.from('videos').download(logoPath(userId));
+  if (error || !data) return null;
+  const bytes = new Uint8Array(await data.arrayBuffer());
+  return bytes.length ? bytes : null;
+}
+
+// Monte puis range une vidéo : plusieurs plans (visite complète) et/ou logo.
+// Si seul le logo pose problème, la vidéo est rangée sans lui plutôt que perdue.
+export async function storeEditedVideo(storagePath, videoUrls, { format, userId, withLogo }) {
+  const clips = [];
+  for (const url of videoUrls) clips.push(await downloadVideo(url));
+  const logo = withLogo ? await loadLogo(userId).catch(() => null) : null;
+  if (clips.length === 1 && !logo) return uploadVideo(storagePath, clips[0]);
+  let edited;
+  try {
+    edited = await editVideo({ clips, logo, format: cleanFormat(format) });
+  } catch (err) {
+    console.error('[droly-api] Montage :', err && err.message);
+    if (clips.length === 1) return uploadVideo(storagePath, clips[0]); // sans le logo
+    err.permanent = true; // un montage impossible le restera : pas de boucle infinie
+    throw err;
+  }
+  return uploadVideo(storagePath, edited);
 }
 
 // Lien de lecture (ou de téléchargement) temporaire vers une vidéo rangée.
@@ -395,17 +490,26 @@ export async function signedVideoUrl(storagePath, seconds = 3600, downloadName) 
 
 // Vidéo terminée → fichier dans le stockage privé du client → entrée dans
 // "Mes vidéos". Peut être relancée sans créer de doublon.
-async function finalize(generation, videoUrl) {
+export const VIDEO_KINDS = ['travelling', 'tour', 'visit'];
+const cleanKind = (kind) => (VIDEO_KINDS.includes(kind) ? kind : 'travelling');
+
+async function finalize(generation, result) {
   const db = supabaseAdmin();
   const storagePath = `${generation.user_id}/${generation.id}.mp4`;
-  await storeVideo(storagePath, videoUrl);
+  const options = generation.options && typeof generation.options === 'object' ? generation.options : {};
+  const urls = result.urls && result.urls.length ? result.urls : [result.url];
+  if (urls.length === 1 && !options.logo) {
+    await storeVideo(storagePath, urls[0]);
+  } else {
+    await storeEditedVideo(storagePath, urls, { format: options.format, userId: generation.user_id, withLogo: !!options.logo });
+  }
 
   const { data: video, error } = await db
     .from('videos')
     .upsert(
       {
         id: generation.id, user_id: generation.user_id, title: generation.title,
-        storage_path: storagePath, kind: generation.kind === 'tour' ? 'tour' : 'travelling',
+        storage_path: storagePath, kind: cleanKind(generation.kind),
       },
       { onConflict: 'id' }
     )
@@ -434,7 +538,7 @@ export async function advance(generation) {
   const claimed = await claim(generation.id);
   if (!claimed) return { state: 'pending' }; // une autre requête s'en occupe déjà
   try {
-    return { state: 'succeeded', video: await finalize(claimed, result.url) };
+    return { state: 'succeeded', video: await finalize(claimed, result) };
   } catch (err) {
     if (err.permanent) {
       await markFailed(generation.id, err.message);

@@ -7,6 +7,7 @@
 
 import { env, handler, json, limits } from './_shared.js';
 import { videoKeyName, videoModel, videoProvider } from './_generation.js';
+import { videoEditingAvailable } from './_video.js';
 
 // La clé vidéo attendue dépend du fournisseur : FAL_KEY (fal.ai) ou
 // SEEDANCE_API_KEY (BytePlus). Une seule des deux suffit.
@@ -66,6 +67,8 @@ export default handler('config', async () => {
     stripeMode: sk ? (/_live_/.test(sk) ? 'live' : 'test') : null,
     limits: limits(),
     videoProvider: videoProvider(),
+    // Outil de montage (visites complètes, logo) bien installé sur Vercel ?
+    videoEditing: await videoEditingAvailable(),
     videoModel: videoModel('travelling'),
     tourModel: videoModel('tour'),
     checks,

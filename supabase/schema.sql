@@ -45,7 +45,8 @@ create table if not exists public.videos (
 create index if not exists videos_user_created_idx
   on public.videos (user_id, created_at desc);
 
--- Type de vidéo : 'travelling' (plan drone, 5 s) ou 'tour' (tour à 360°, 10 s).
+-- Type de vidéo : 'travelling' (plan drone, 5 s), 'tour' (tour à 360°, 10 s)
+-- ou 'visit' (visite complète : plusieurs pièces enchaînées).
 alter table public.videos add column if not exists kind text not null default 'travelling';
 
 alter table public.videos enable row level security;
@@ -82,8 +83,12 @@ create table if not exists public.generations (
 create index if not exists generations_user_created_idx
   on public.generations (user_id, created_at desc);
 
--- Type de vidéo demandée : 'travelling' ou 'tour' (les tours à 360° ont leur propre limite).
+-- Type de vidéo demandée : 'travelling', 'tour' ou 'visit' (les tours à 360° et
+-- les visites complètes ont chacun leur propre limite).
 alter table public.generations add column if not exists kind text not null default 'travelling';
+
+-- Réglages de la vidéo : format (paysage / vertical), logo de l'agence, nombre de photos.
+alter table public.generations add column if not exists options jsonb not null default '{}'::jsonb;
 
 alter table public.generations enable row level security;
 
@@ -97,22 +102,27 @@ create policy "Lire ses generations"
 -- même 50 demandes envoyées en même temps ne peuvent pas dépasser la limite.
 -- Les tours à 360° comptent dans la limite générale ET dans leur propre limite
 -- (p_tour_monthly, sur 30 jours), car ils coûtent plus cher à fabriquer.
--- (L'ancienne version de la fonction, sans type de vidéo, est remplacée.)
+-- Les visites complètes ont aussi leur limite (p_visit_monthly), car elles
+-- fabriquent plusieurs plans d'un coup.
+-- (Les anciennes versions de la fonction sont remplacées.)
 drop function if exists public.reserve_generation(uuid, text, int, int);
+drop function if exists public.reserve_generation(uuid, text, int, int, text, int);
 
 create or replace function public.reserve_generation(
   p_user uuid, p_title text, p_daily int, p_monthly int,
-  p_kind text default 'travelling', p_tour_monthly int default 0
+  p_kind text default 'travelling', p_tour_monthly int default 0,
+  p_visit_monthly int default 0, p_options jsonb default '{}'::jsonb
 ) returns jsonb
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_kind      text := case when p_kind = 'tour' then 'tour' else 'travelling' end;
+  v_kind      text := case when p_kind in ('tour', 'visit') then p_kind else 'travelling' end;
   day_count   int;
   month_count int;
   tour_count  int;
+  visit_count int;
   new_id      uuid;
 begin
   perform pg_advisory_xact_lock(hashtextextended(p_user::text, 0));
@@ -140,7 +150,17 @@ begin
     end if;
   end if;
 
-  insert into public.generations (user_id, title, kind) values (p_user, p_title, v_kind)
+  if v_kind = 'visit' and p_visit_monthly > 0 then
+    select count(*) into visit_count from public.generations
+     where user_id = p_user and kind = 'visit' and status <> 'failed'
+       and created_at > now() - interval '30 days';
+    if visit_count >= p_visit_monthly then
+      return jsonb_build_object('error', 'visit_limit');
+    end if;
+  end if;
+
+  insert into public.generations (user_id, title, kind, options)
+  values (p_user, p_title, v_kind, coalesce(p_options, '{}'::jsonb))
   returning id into new_id;
   return jsonb_build_object('id', new_id);
 end;
@@ -163,9 +183,9 @@ as $$
 $$;
 
 -- Ces fonctions sont réservées au serveur (clé secrète), jamais aux visiteurs.
-revoke all on function public.reserve_generation(uuid, text, int, int, text, int) from public, anon, authenticated;
+revoke all on function public.reserve_generation(uuid, text, int, int, text, int, int, jsonb) from public, anon, authenticated;
 revoke all on function public.claim_generation(uuid) from public, anon, authenticated;
-grant execute on function public.reserve_generation(uuid, text, int, int, text, int) to service_role;
+grant execute on function public.reserve_generation(uuid, text, int, int, text, int, int, jsonb) to service_role;
 grant execute on function public.claim_generation(uuid) to service_role;
 
 
