@@ -131,6 +131,8 @@ section[id]{scroll-margin-top:90px;}
 .flow-row{display:flex;gap:12px;}
 .flow-row > div{flex:1;min-width:0;}
 .flow-secure{font-size:0.75rem;color:var(--ink-mute);text-align:center;margin:16px 0 0;}
+.flow-secure a{text-decoration:underline;text-underline-offset:2px;}
+.flow-secure a:hover{color:var(--ink);}
 .flow-success-icon{width:52px;height:52px;border-radius:50%;background:rgba(255,90,95,0.15);border:1px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 0 20px;font-size:1.5rem;}
 .flow-submit[disabled]{opacity:0.7;cursor:default;}
 .trial-drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:150px;padding:18px;border:1.5px dashed var(--line-strong);border-radius:var(--radius-m);background:var(--bg);cursor:pointer;margin:0 0 16px;overflow:hidden;}
@@ -490,10 +492,12 @@ section[id]{scroll-margin-top:90px;}
       <div class="footer-links">
         <a href="#comment">Comment ça marche</a>
         <a href="app.html">Mon espace</a>
-        <a href="#top">Haut de page</a>
+        <a href="cgv.html">Conditions générales</a>
+        <a href="confidentialite.html">Confidentialité</a>
+        <a href="mentions-legales.html">Mentions légales</a>
       </div>
     </div>
-    <p class="footer-note">Concept MVP inspiré de dronly.co — projet d’exploration, non affilié.</p>
+    <p class="footer-note">© 2026 Droly · Vidéos créées par intelligence artificielle à partir de vos photos.</p>
   </div>
 </footer>
 
@@ -519,7 +523,7 @@ section[id]{scroll-margin-top:90px;}
         </div>
       </div>
       <button class="btn-primary flow-block" id="trialSubmit" type="button" style="margin-top:18px;">Générer ma vidéo gratuite</button>
-      <p class="flow-secure">Une vidéo gratuite par personne. Aucun paiement, aucune carte demandée.</p>
+      <p class="flow-secure">Une vidéo gratuite par personne. Aucun paiement, aucune carte demandée. <a href="confidentialite.html" target="_blank" rel="noopener">Vos données</a></p>
     </div>
 
     <div class="flow-step" data-step="processing">

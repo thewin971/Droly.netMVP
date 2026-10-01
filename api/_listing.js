@@ -5,7 +5,7 @@
 const TIMEOUT_MS = 9000;
 const MAX_HTML = 1200 * 1024;   // on ne lit que le début de la page
 const MAX_PHOTOS = 8;
-const USER_AGENT = 'DrolyBot/1.0 (+https://droly.fr ; recuperation des photos d une annonce a la demande de son proprietaire)';
+const USER_AGENT = 'DrolyBot/1.0 (+https://www.droly.net ; recuperation des photos d une annonce a la demande de son proprietaire)';
 
 // Adresses internes : jamais appelées (sécurité).
 const PRIVATE_HOST =

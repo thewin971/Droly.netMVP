@@ -1,0 +1,72 @@
+/* Pages légales de Droly (CGV, confidentialité, mentions légales). */
+:root{
+  --bg:#0B0A08;
+  --bg-elev:#15130E;
+  --ink:#F3EEE2;
+  --ink-dim:#B7AE9A;
+  --ink-mute:#8C836F;
+  --accent:#FF5A5F;
+  --line:rgba(243,238,226,0.10);
+  --line-strong:rgba(243,238,226,0.20);
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Work Sans', system-ui, sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.65;}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line-strong);text-underline-offset:3px;}
+a:hover{text-decoration-color:var(--accent);}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+
+.nav{position:sticky;top:0;z-index:10;background:rgba(11,10,8,0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;}
+.wrap{max-width:780px;margin:0 auto;padding:0 20px;}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:1.2rem;text-decoration:none;}
+.brand svg{width:22px;height:22px;flex:none;}
+.nav-back{font-size:0.9rem;color:var(--ink-dim);text-decoration:none;}
+.nav-back:hover{color:var(--ink);}
+
+main{padding:48px 0 72px;}
+.eyebrow{font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;font-weight:600;}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.15;letter-spacing:-0.01em;margin:0 0 12px;}
+.updated{color:var(--ink-mute);font-size:0.9rem;margin:0 0 32px;}
+.intro{color:var(--ink-dim);font-size:1.02rem;margin:0 0 28px;}
+h2{font-family:var(--serif);font-weight:600;font-size:1.3rem;margin:40px 0 10px;padding-top:24px;border-top:1px solid var(--line);}
+h3{font-size:1rem;margin:22px 0 6px;}
+p,li{color:var(--ink-dim);font-size:0.98rem;}
+p strong,li strong{color:var(--ink);font-weight:600;}
+ul{padding-left:1.2em;margin:8px 0 14px;}
+li{margin:4px 0;}
+
+.toc{background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin:0 0 8px;}
+.toc p{margin:0 0 6px;color:var(--ink);font-weight:600;font-size:0.9rem;}
+.toc ol{margin:0;padding-left:1.3em;columns:2;column-gap:28px;}
+.toc li{font-size:0.9rem;margin:0;padding:3px 0;break-inside:avoid;}
+.toc a{text-decoration:none;color:var(--ink-dim);}
+.toc a:hover{color:var(--ink);}
+@media (max-width:600px){ .toc ol{columns:1;} }
+
+.card{background:var(--bg-elev);border:1px solid var(--line);border-radius:14px;padding:6px 20px;margin:12px 0 18px;}
+.card dl{margin:0;}
+.card .row{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+.card .row:last-child{border-bottom:0;}
+.card dt{color:var(--ink-mute);font-size:0.9rem;}
+.card dd{margin:0;color:var(--ink);font-size:0.95rem;overflow-wrap:anywhere;}
+@media (max-width:600px){ .card .row{grid-template-columns:1fr;gap:2px;} }
+
+.box{border-left:3px solid var(--accent);background:rgba(255,90,95,0.06);border-radius:0 12px 12px 0;padding:12px 16px;margin:14px 0;}
+.box p{margin:0;color:var(--ink);}
+
+table{width:100%;border-collapse:collapse;margin:10px 0 18px;font-size:0.92rem;}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink-dim);}
+th{color:var(--ink);font-weight:600;background:var(--bg-elev);}
+.table-scroll{overflow-x:auto;}
+.table-scroll table{min-width:520px;}
+
+.todo{color:#f1b4ab;font-style:italic;}
+
+.foot{border-top:1px solid var(--line);padding:28px 0 40px;}
+.foot .wrap{display:flex;flex-wrap:wrap;gap:12px 22px;font-size:0.88rem;}
+.foot a{color:var(--ink-dim);text-decoration:none;}
+.foot a:hover{color:var(--ink);}
+.foot a[aria-current="page"]{color:var(--ink);}
+.foot .copy{color:var(--ink-mute);flex-basis:100%;margin:6px 0 0;}

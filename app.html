@@ -159,6 +159,13 @@ p{line-height:1.6;}
 .logo-prev img{max-width:100%;max-height:100%;display:block;}
 .logo-use{display:flex;align-items:center;gap:8px;font-size:0.875rem;cursor:pointer;flex:1;min-width:180px;}
 .logo-use input{width:18px;height:18px;accent-color:var(--accent);margin:0;flex:none;}
+.terms{display:flex;align-items:flex-start;gap:10px;margin:0 0 16px;font-size:0.8125rem;line-height:1.5;color:var(--ink-dim);cursor:pointer;text-align:left;}
+.terms input{width:18px;height:18px;accent-color:var(--accent);margin:1px 0 0;flex:none;}
+.terms a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;}
+.terms.missing{color:#f1b4ab;}
+.app-foot{max-width:920px;margin:0 auto;padding:0 20px 36px;display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;font-size:0.8125rem;}
+.app-foot a{color:var(--ink-mute);}
+.app-foot a:hover{color:var(--ink);}
 .file-btn{position:relative;overflow:hidden;padding:9px 16px;font-size:0.8125rem;}
 .file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 
@@ -317,6 +324,7 @@ p{line-height:1.6;}
           <li>Toutes vos vidéos rangées dans votre espace</li>
           <li>Résiliable à tout moment, en deux clics</li>
         </ul>
+        <label class="terms" id="termsLabel"><input type="checkbox" id="termsCheck"><span>J’accepte les <a href="cgv.html" target="_blank" rel="noopener">conditions générales de vente</a>. Je demande l’accès immédiat au service et je reconnais perdre mon droit de rétractation dès ma première vidéo créée.</span></label>
         <button class="btn btn-primary btn-block" type="button" id="subscribeBtn">S’abonner — 29€/mois</button>
         <button class="btn btn-ghost btn-block" type="button" id="fixPaymentBtn" hidden style="margin-top:10px;">Mettre à jour mon moyen de paiement</button>
         <p class="muted small center" style="margin:16px 0 0;">Paiement sécurisé par Stripe. Votre carte n’est jamais enregistrée sur Droly.</p>
@@ -472,6 +480,12 @@ p{line-height:1.6;}
   </section>
 
 </main>
+
+<footer class="app-foot">
+  <a href="cgv.html">Conditions générales</a>
+  <a href="confidentialite.html">Confidentialité</a>
+  <a href="mentions-legales.html">Mentions légales</a>
+</footer>
 
 <script type="module">
 // ===========================================================================
@@ -826,12 +840,18 @@ function showSubscribe(message){
       : 'Générez les vidéos de vos annonces, sans filigrane, prêtes à livrer à vos clients.');
   $('#fixPaymentBtn').hidden = !(paymentIssue && subscription.stripe_customer_id);
   $('#subscribeBtn').hidden = paymentIssue && !!subscription.stripe_customer_id;
+  $('#termsLabel').hidden = $('#subscribeBtn').hidden;
   notice('#subMsg', message && /annulé/.test(message) ? null : 'error', message || '');
   show('subscribe');
 }
 
 $('#subscribeBtn').addEventListener('click', async function(){
   var btn = this;
+  if (!$('#termsCheck').checked){
+    $('#termsLabel').classList.add('missing');
+    notice('#subMsg', 'error', 'Cochez la case pour accepter les conditions générales de vente.');
+    return $('#termsCheck').focus();
+  }
   setBusy(btn, true, 'Redirection vers le paiement…');
   try {
     var data = await api('/api/create-checkout');
@@ -858,6 +878,11 @@ async function openPortal(btn, msgTarget){
     setBusy(btn, false);
   }
 }
+$('#termsCheck').addEventListener('change', function(){
+  if (!this.checked) return;
+  $('#termsLabel').classList.remove('missing');
+  notice('#subMsg', null, '');
+});
 $('#fixPaymentBtn').addEventListener('click', function(){ openPortal(this, '#subMsg'); });
 $('#portalBtn').addEventListener('click', function(){ openPortal(this, '#accountMsg'); });
 
@@ -1063,12 +1088,15 @@ function currentKind(){
     format: f && f.value === 'vertical' ? 'vertical' : 'landscape'
   };
 }
+// Les « autres photos du même lieu » ne servent qu'avec BytePlus : fal.ai crée
+// le tour à partir d'une seule photo, on ne les propose donc pas.
+function extrasSupported(){ return !(cfg && cfg.videoProvider === 'fal'); }
 function applyKind(){
   var k = currentKind();
   var visit = k.kind === 'visit';
   document.querySelectorAll('#kindPicker .kind, #variantPicker .pill, #formatPicker .pill').forEach(function(l){ l.classList.toggle('on', l.querySelector('input').checked); });
   $('#variantPicker').hidden = k.kind !== 'tour';
-  $('#extraField').hidden = k.kind !== 'tour';
+  $('#extraField').hidden = k.kind !== 'tour' || !extrasSupported();
   $('#visitField').hidden = !visit;
   $('#drop').hidden = visit;
   $('#photoHint').hidden = visit;
@@ -1280,7 +1308,7 @@ function renderListingPhotos(reason){
       renderVisit();
     });
     t.appendChild(img); t.appendChild(b);
-    if (currentKind().kind === 'tour'){
+    if (currentKind().kind === 'tour' && extrasSupported()){
       var plus = document.createElement('button');
       plus.type = 'button'; plus.textContent = '+'; plus.className = 'plus';
       plus.setAttribute('aria-label', 'Ajouter la photo ' + (i + 1) + ' aux photos du même lieu');
@@ -1384,7 +1412,7 @@ $('#genForm').addEventListener('submit', async function(e){
   if (logoUrl && $('#logoCheck').checked) payload.logo = true;
   if (k.kind === 'tour'){
     payload.variant = k.variant;
-    if (extraImages.length) payload.extraImages = extraImages.slice();
+    if (extraImages.length && extrasSupported()) payload.extraImages = extraImages.slice();
   }
 
   generating = true;

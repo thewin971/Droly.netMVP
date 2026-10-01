@@ -16,6 +16,34 @@ export const TRIAL_FAILED_MESSAGE =
 
 export const trialPath = (id) => `free/${id}.mp4`;
 
+// Données d'un essai (email, empreinte de connexion, vidéo) : effacées au bout
+// de 12 mois, comme annoncé dans la politique de confidentialité. Le ménage se
+// fait à chaque nouvel essai, par petits lots ; une erreur ne bloque jamais l'essai.
+export const TRIAL_RETENTION_DAYS = 365;
+
+export async function purgeOldTrials() {
+  try {
+    const cutoff = new Date(Date.now() - TRIAL_RETENTION_DAYS * 86400000).toISOString();
+    const admin = supabaseAdmin();
+    const { data, error } = await admin
+      .from('free_trials')
+      .select('id')
+      .lt('created_at', cutoff)
+      .limit(100);
+    if (error) throw error;
+    if (!data || !data.length) return 0;
+    const ids = data.map((row) => row.id);
+    const { error: storageError } = await admin.storage.from('videos').remove(ids.map(trialPath));
+    if (storageError) throw storageError;
+    const { error: deleteError } = await admin.from('free_trials').delete().in('id', ids);
+    if (deleteError) throw deleteError;
+    return ids.length;
+  } catch (err) {
+    console.error('[droly-api] purgeOldTrials :', err && err.message);
+    return 0;
+  }
+}
+
 export async function getTrial(id) {
   const { data, error } = await supabaseAdmin()
     .from('free_trials')

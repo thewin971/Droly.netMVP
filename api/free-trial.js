@@ -9,7 +9,7 @@ import {
   checkImage, configError, fail, handler, ipFingerprint, json, limits, supabaseAdmin,
 } from './_shared.js';
 import { createVideoTask, POLL_INTERVAL_MS, sleep, videoKeyName } from './_generation.js';
-import { advanceTrial, markTrialFailed, updateTrial } from './_trial.js';
+import { advanceTrial, markTrialFailed, purgeOldTrials, updateTrial } from './_trial.js';
 import { fetchListingPhotos } from './_listing.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
@@ -47,6 +47,9 @@ export default handler('free-trial', async (request) => {
     }
   }
   if (!image) return fail(400, 'bad_image', 'Ajoutez une photo de votre annonce.');
+
+  // Ménage : les essais de plus de 12 mois sont effacés (politique de confidentialité).
+  await purgeOldTrials();
 
   const ipHash = await ipFingerprint(request);
   const { data: reservation, error: reserveError } = await supabaseAdmin().rpc('reserve_free_trial', {

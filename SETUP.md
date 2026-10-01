@@ -236,6 +236,13 @@ Facultatif :
 | `SEEDANCE_TOUR_MODEL` | modèle des tours à 360° (défaut : `dreamina-seedance-2-0-mini-260615`). Voir étape 3bis. |
 | `MAX_VISITS_PER_MONTH` | visites complètes par client sur 30 jours (défaut : 5). Chaque visite fabrique un plan par photo (2 à 6), puis les monte en une vidéo. |
 | `SITE_URL` | seulement si tu utilises un nom de domaine personnalisé, ex. `https://droly.fr` |
+| `LEGAL_NAME` | nom de l'éditeur du site (ex. « Prénom NOM, entrepreneur individuel ») — affiché sur les pages légales |
+| `LEGAL_ADDRESS` | adresse postale de l'éditeur |
+| `LEGAL_PHONE` | numéro de téléphone de l'éditeur (obligatoire dans les mentions légales) |
+| `LEGAL_SIRET` | numéro SIRET (14 chiffres) |
+| `CONTACT_EMAIL` | email de contact affiché aux clients (rétractation, données personnelles…) |
+| `LEGAL_VAT` | facultatif : numéro de TVA. Vide = « TVA non applicable, article 293 B du CGI » (micro-entreprise) |
+| `LEGAL_MEDIATOR` | facultatif : médiateur de la consommation, ex. « Nom du médiateur — https://site-du-mediateur.fr » |
 
 **Puis redéploie** (les réglages ne s'appliquent qu'au déploiement suivant) :
 **Deployments** → sur le dernier déploiement, menu **⋯** → **Redeploy**.
@@ -301,8 +308,11 @@ subscription » (3c) en mode live.
 
 ## Avant d'encaisser tes premiers clients
 
-- **Obligations légales (France)** : mentions légales, conditions générales de vente (CGV) et politique de confidentialité
-  (tu stockes des emails : RGPD) doivent être accessibles sur le site. Fais-les valider si besoin.
+- **Obligations légales (France)** : les pages `cgv.html`, `confidentialite.html` et `mentions-legales.html` sont prêtes ;
+  leurs informations (nom, adresse, SIRET…) se remplissent avec les variables `LEGAL_…` et `CONTACT_EMAIL` (étape 4).
+  Tant qu'une variable manque, la page affiche « à compléter ». Fais-les relire si besoin. Dans Stripe (mode live) :
+  **Paramètres → Informations publiques de l'entreprise** → Conditions d'utilisation `https://ton-domaine/cgv.html`,
+  Politique de confidentialité `https://ton-domaine/confidentialite.html` (obligatoire pour le portail client).
 - **Emails** : branche un service SMTP (étape 2e), sinon tes clients ne reçoivent aucun email.
 - **Vercel Pro** : l'offre gratuite de Vercel est réservée aux projets non commerciaux.
 - **Supabase** : l'offre gratuite inclut 1 Go de stockage (quelques centaines de vidéos) et met le projet en pause

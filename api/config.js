@@ -73,5 +73,17 @@ export default handler('config', async () => {
     tourModel: videoModel('tour'),
     checks,
     warnings: warnings(),
+    // Informations publiques de l'éditeur, affichées sur les pages légales
+    // (CGV, confidentialité, mentions légales). Vides tant qu'elles ne sont
+    // pas renseignées dans Vercel : les pages affichent alors « à compléter ».
+    legal: {
+      name: env('LEGAL_NAME'),
+      address: env('LEGAL_ADDRESS'),
+      phone: env('LEGAL_PHONE'),
+      siret: env('LEGAL_SIRET'),
+      email: env('CONTACT_EMAIL'),
+      vat: env('LEGAL_VAT'),
+      mediator: env('LEGAL_MEDIATOR'),
+    },
   });
 });
